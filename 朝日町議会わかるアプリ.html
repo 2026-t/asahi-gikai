@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>朝日町議会わかるアプリ｜富山県朝日町</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+    background: linear-gradient(180deg, #f0f7ff 0%, #f8fafc 300px, #f8fafc 100%);
+    color: #1f2937; line-height: 1.7; min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+    color: white; padding: 28px 20px 22px;
+    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.25);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner { max-width: 1100px; margin: 0 auto; }
+  header h1 { font-size: 1.6rem; margin-bottom: 4px; font-weight: 700; }
+  header .subtitle { font-size: 0.85rem; opacity: 0.95; }
+  header .tagline {
+    font-size: 0.95rem; margin-top: 8px; padding: 6px 12px;
+    background: rgba(255,255,255,0.15); border-radius: 8px; display: inline-block;
+  }
+  nav.tabs {
+    background: white; padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: sticky; top: 102px; z-index: 99;
+    overflow-x: auto; white-space: nowrap;
+  }
+  nav.tabs .tabs-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 4px; }
+  nav.tabs button {
+    background: none; border: none; padding: 16px 18px;
+    font-size: 0.95rem; font-weight: 600; color: #6b7280;
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all 0.2s; font-family: inherit;
+  }
+  nav.tabs button:hover { color: #2563eb; background: #f3f4f6; }
+  nav.tabs button.active { color: #2563eb; border-bottom-color: #2563eb; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .intro-card {
+    background: white; border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px;
+  }
+  .intro-card h2 { font-size: 1.3rem; color: #1e40af; margin-bottom: 12px; }
+  .intro-card p { color: #4b5563; margin-bottom: 8px; }
+
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px; margin-bottom: 24px;
+  }
+  .feature-card {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid #2563eb;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  .feature-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .feature-card h3 { font-size: 1.05rem; color: #1f2937; margin-bottom: 6px; }
+  .feature-card p { color: #6b7280; font-size: 0.88rem; }
+
+  /* 議員カード */
+  .members-section { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .members-section h2 { font-size: 1.3rem; color: #1e40af; margin-bottom: 8px; }
+  .members-section .term-info { color: #6b7280; font-size: 0.85rem; margin-bottom: 16px; }
+  .members-section h3 { font-size: 1rem; color: #374151; margin: 14px 0 10px; }
+  .members-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .member-card {
+    background: #fafafa; border-radius: 12px; padding: 14px 16px;
+    border-left: 4px solid var(--c, #6366f1); position: relative;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .member-card:hover { background: #f3f4f6; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+  .member-card::after {
+    content: "詳細 →"; position: absolute; bottom: 8px; right: 12px;
+    font-size: 0.7rem; color: var(--c); font-weight: 700; opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .member-card:hover::after { opacity: 1; }
+
+  /* モーダル */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); z-index: 1000;
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 20px; overflow-y: auto;
+  }
+  .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+  .modal-box {
+    background: white; border-radius: 16px; max-width: 800px; width: 100%;
+    margin: 20px auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s;
+  }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header {
+    background: linear-gradient(135deg, var(--c, #2563eb), #1e40af);
+    color: white; padding: 22px 24px; border-radius: 16px 16px 0 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-header h2 { font-size: 1.5rem; margin-bottom: 6px; }
+  .modal-header .modal-subinfo { font-size: 0.85rem; opacity: 0.95; }
+  .modal-close {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    font-size: 1.2rem; font-family: inherit; flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.3); }
+  .modal-body { padding: 20px 24px 28px; }
+  .modal-stats {
+    background: #f9fafb; border-radius: 10px; padding: 14px;
+    margin-bottom: 18px; display: flex; flex-wrap: wrap; gap: 16px;
+    font-size: 0.88rem; color: #374151;
+  }
+  .modal-stats .stat-label { color: #6b7280; font-size: 0.78rem; }
+  .modal-stats .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--c, #1f2937); }
+  .modal-section-title {
+    font-size: 1rem; color: #1e40af; margin: 18px 0 10px;
+    padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; font-weight: 700;
+  }
+  .modal-question-list { display: flex; flex-direction: column; gap: 10px; }
+  .modal-question-item {
+    background: #fafbfc; border-radius: 10px; padding: 14px;
+    border-left: 4px solid var(--c, #6366f1);
+  }
+  .modal-question-item .mq-header {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;
+    align-items: center;
+  }
+  .modal-question-item .mq-title { color: #1f2937; font-weight: 700; font-size: 0.95rem; flex: 1; }
+  .modal-question-item .mq-q { background: #fef9c3; padding: 7px 10px; border-radius: 6px; margin: 4px 0; font-size: 0.85rem; }
+  .modal-question-item .mq-a { background: #f0fdf4; padding: 7px 10px; border-radius: 6px; margin: 4px 0; font-size: 0.85rem; }
+  .modal-question-item .mq-easy { background: #eff6ff; padding: 7px 10px; border-radius: 6px; margin-top: 6px; font-size: 0.83rem; color: #1e3a8a; }
+  .modal-question-item .mq-label { font-weight: 700; margin-right: 4px; font-size: 0.78rem; }
+  .member-card .seat {
+    position: absolute; top: 8px; right: 10px;
+    background: #e5e7eb; color: #4b5563; font-size: 0.7rem;
+    padding: 2px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .member-card .role-badge {
+    display: inline-block; background: #dc2626; color: white;
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 8px;
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .member-card .role-badge.sub { background: #f59e0b; }
+  .member-card .member-name { font-size: 1.1rem; font-weight: 700; color: #1f2937; margin-bottom: 2px; }
+  .member-card .member-furigana { font-size: 0.75rem; color: #9ca3af; margin-bottom: 8px; }
+  .member-card .member-info { font-size: 0.75rem; color: #4b5563; line-height: 1.5; }
+  .member-card .member-info .label { color: #9ca3af; }
+  .member-card .member-info .kaiha-name { color: var(--c); font-weight: 700; }
+  .member-card .member-info .party-dem { color: #b91c1c; font-weight: 600; }
+  .member-card .member-info .party-ind { color: #6b7280; }
+  .member-card .terms { font-size: 0.72rem; color: #6b7280; margin-top: 4px; }
+
+  /* 会派・党派 集計 (小さく下に) */
+  .breakdown-section {
+    background: #f9fafb; border-radius: 10px; padding: 14px;
+    margin-top: 18px; font-size: 0.82rem;
+  }
+  .breakdown-section h4 { font-size: 0.85rem; color: #6b7280; margin-bottom: 8px; font-weight: 600; }
+  .breakdown-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+  .breakdown-row:last-child { margin-bottom: 0; }
+  .breakdown-chip {
+    background: white; padding: 5px 10px; border-radius: 14px;
+    font-size: 0.78rem; border-left: 3px solid var(--c, #6366f1);
+    color: #4b5563;
+  }
+  .breakdown-chip strong { color: var(--c, #1f2937); margin-right: 4px; }
+
+  /* 定例会 */
+  .session-list { display: flex; flex-direction: column; gap: 16px; }
+  .session-card {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 5px solid #2563eb;
+  }
+  .session-card h3 { font-size: 1.15rem; color: #1e40af; margin-bottom: 6px; }
+  .session-card .meta { color: #6b7280; font-size: 0.85rem; margin-bottom: 10px; }
+  .session-card .summary { color: #374151; margin-bottom: 12px; font-size: 0.93rem; }
+  .session-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .stat {
+    background: #eff6ff; color: #1e40af; padding: 5px 10px;
+    border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+  }
+  .session-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .session-card .primary-action { margin: 14px 0 10px; }
+  .btn-primary-large {
+    display: block; width: 100%; background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white; border: none; padding: 14px 20px; border-radius: 10px;
+    font-size: 1rem; cursor: pointer; font-weight: 700;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn-primary-large:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+  .session-card .sub-links {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    padding-top: 8px; border-top: 1px dashed #e5e7eb;
+  }
+  .btn-mini {
+    background: none; border: none; padding: 4px 0;
+    color: #6b7280; font-size: 0.8rem; text-decoration: none;
+    font-family: inherit; cursor: pointer; font-weight: 500;
+    border-bottom: 1px dotted #9ca3af;
+  }
+  .btn-mini:hover { color: #2563eb; border-bottom-color: #2563eb; }
+  .btn-mini.disabled { color: #d1d5db; border-bottom-color: transparent; cursor: not-allowed; }
+  .btn {
+    background: #2563eb; color: white; border: none; padding: 8px 14px;
+    border-radius: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 600;
+    text-decoration: none; display: inline-block; transition: background 0.2s;
+    font-family: inherit;
+  }
+  .btn:hover { background: #1d4ed8; }
+  .btn.secondary { background: #f3f4f6; color: #374151; }
+  .btn.secondary:hover { background: #e5e7eb; }
+  .btn.minutes { background: #059669; }
+  .btn.minutes:hover { background: #047857; }
+
+  /* 議会別Q&Aセクション */
+  .session-qa-block {
+    background: white; border-radius: 14px; padding: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .session-qa-header {
+    background: linear-gradient(135deg, #1e40af, #2563eb); color: white;
+    padding: 14px 18px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .session-qa-header:hover { filter: brightness(1.1); }
+  .session-qa-header h3 { font-size: 1.05rem; font-weight: 700; }
+  .session-qa-header .toggle { font-size: 1.3rem; }
+  .session-qa-body { padding: 16px; display: none; }
+  .session-qa-body.open { display: block; }
+  .session-qa-body .session-meta {
+    background: #f9fafb; padding: 10px 14px; border-radius: 8px;
+    margin-bottom: 12px; font-size: 0.85rem; color: #374151;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .session-qa-body .session-meta a {
+    color: #059669; font-weight: 600; text-decoration: none;
+  }
+  .session-qa-body .session-meta a:hover { text-decoration: underline; }
+
+  .category-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .category-card {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: pointer; transition: all 0.2s;
+    border-top: 4px solid var(--cat-color, #6366f1);
+  }
+  .category-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+  .category-card .cat-icon { font-size: 1.8rem; margin-bottom: 6px; }
+  .category-card h3 { color: #1f2937; margin-bottom: 6px; font-size: 1.05rem; }
+  .category-card .count { color: var(--cat-color, #6366f1); font-weight: 700; font-size: 0.9rem; }
+  .category-card .desc { color: #6b7280; font-size: 0.85rem; margin-top: 4px; }
+
+  .search-box {
+    background: white; border-radius: 12px; padding: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 18px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .search-box input {
+    flex: 1; border: 2px solid #e5e7eb; border-radius: 8px;
+    padding: 10px 14px; font-size: 0.95rem; outline: none; font-family: inherit;
+  }
+  .search-box input:focus { border-color: #2563eb; }
+  .search-box .search-icon { font-size: 1.2rem; color: #9ca3af; }
+
+  .topic-list { display: flex; flex-direction: column; gap: 10px; }
+  .topic-card {
+    background: white; border-radius: 12px; padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border-left: 4px solid #6366f1;
+  }
+  .topic-card .topic-header {
+    margin-bottom: 10px;
+  }
+  .topic-card h4 {
+    color: #1f2937; font-size: 1.08rem; font-weight: 700;
+    line-height: 1.5; margin-bottom: 8px;
+  }
+  .topic-card .topic-tags-row {
+    display: block; margin-top: 4px;
+  }
+  .topic-card .topic-tags-row + .topic-tags-row {
+    margin-top: 4px;
+  }
+  .tag {
+    display: inline-block; padding: 3px 9px; border-radius: 12px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .tag-category { background: #ede9fe; color: #6d28d9; }
+  .tag-session { background: #ecfeff; color: #0e7490; }
+  .topic-card .speaker-info { font-size: 0.82rem; color: #6b7280; margin-bottom: 8px; }
+  .topic-card .question {
+    background: #fef9c3; padding: 8px 12px; border-radius: 8px;
+    margin: 6px 0; border-left: 3px solid #eab308; font-size: 0.9rem;
+  }
+  .topic-card .answer {
+    background: #f0fdf4; padding: 8px 12px; border-radius: 8px;
+    margin: 6px 0; border-left: 3px solid #22c55e; font-size: 0.9rem;
+  }
+  .topic-card .label {
+    font-weight: 700; color: #92400e; margin-right: 6px; font-size: 0.82rem;
+  }
+  .topic-card .answer .label { color: #166534; }
+  .topic-card .easy-summary {
+    background: #eff6ff; padding: 8px 12px; border-radius: 8px;
+    margin-top: 8px; border-left: 3px solid #3b82f6; font-size: 0.88rem; color: #1e3a8a;
+  }
+  .topic-card .easy-summary::before { content: "💡 やさしく言うと："; font-weight: 700; }
+
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .term-card {
+    background: white; border-radius: 12px; padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .term-card h4 { color: #1e40af; font-size: 1.1rem; margin-bottom: 4px; }
+  .term-card .kana { color: #9ca3af; font-size: 0.8rem; }
+  .term-card p { color: #4b5563; font-size: 0.93rem; }
+  .term-card .example {
+    background: #f9fafb; padding: 8px 12px; border-radius: 6px;
+    margin-top: 8px; font-size: 0.85rem; color: #6b7280;
+    border-left: 2px solid #d1d5db;
+  }
+
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-btn {
+    background: white; border: 1.5px solid #e5e7eb; padding: 6px 14px;
+    border-radius: 20px; font-size: 0.83rem; cursor: pointer; font-weight: 600;
+    color: #6b7280; transition: all 0.2s; font-family: inherit;
+  }
+  .filter-btn:hover { border-color: #2563eb; color: #2563eb; }
+  .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: #9ca3af; }
+  .empty-state .icon { font-size: 3rem; opacity: 0.5; }
+
+  footer {
+    text-align: center; padding: 30px 20px; color: #6b7280; font-size: 0.85rem;
+    border-top: 1px solid #e5e7eb; margin-top: 40px;
+  }
+  footer a { color: #2563eb; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    header h1 { font-size: 1.3rem; }
+    nav.tabs { top: 96px; }
+    nav.tabs button { padding: 14px 12px; font-size: 0.85rem; }
+    main { padding: 16px 12px 40px; }
+    .feature-card, .session-card, .topic-card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1>🏛 朝日町議会わかるアプリ</h1>
+    <div class="subtitle">富山県下新川郡朝日町｜議会の話し合いを、みんなにわかりやすく</div>
+    <div class="tagline">2023年からの全議会を分かりやすく整理</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" data-tab="home">🏠 ホーム</button>
+    <button class="tab-btn" data-tab="sessions">📅 定例会一覧</button>
+    <button class="tab-btn" data-tab="qa">💬 議会別 質問と答え</button>
+    <button class="tab-btn" data-tab="categories">📂 議題分類</button>
+    <button class="tab-btn" data-tab="glossary">📖 用語解説</button>
+  </div>
+</nav>
+
+<main>
+  <!-- ホーム -->
+  <section class="panel active" id="panel-home">
+    <div class="intro-card">
+      <h2>📣 議会って、なに話してるの？</h2>
+      <p>朝日町議会では、町の予算、子育て、医療、道路、防災など、私たちの暮らしに直接かかわることが話し合われています。本会議はすべて<strong>YouTube Liveで生中継</strong>され、録画も配信されます。</p>
+      <p style="margin-top:10px;">このアプリは、2023年からの全議会（13回分）の質問と答えを、町民にわかりやすく整理したものです。</p>
+    </div>
+
+    <!-- 議員紹介セクション -->
+    <div class="members-section">
+      <h2>👥 朝日町議会議員（現職10名）</h2>
+      <div class="term-info">📌 任期：令和4年8月29日〜令和8年8月28日　｜　議長：水野仁士　副議長：石原孝之</div>
+
+      <h3>議員一覧（議席順）</h3>
+      <div class="members-grid" id="members-grid"></div>
+
+      <!-- 会派・党派の集計を下に小さく表示 -->
+      <div class="breakdown-section">
+        <h4>📊 会派の構成</h4>
+        <div class="breakdown-row" id="kaiha-bar"></div>
+        <h4>🗳 党派の構成</h4>
+        <div class="breakdown-row" id="party-bar"></div>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card" onclick="switchTab('sessions')">
+        <div class="icon">📅</div>
+        <h3>定例会一覧</h3>
+        <p>2023年からの13回の議会日程と中継情報。</p>
+      </div>
+      <div class="feature-card" onclick="switchTab('qa')">
+        <div class="icon">💬</div>
+        <h3>議会別 質問と答え</h3>
+        <p>各議会で何が質問されたか、議会ごとに整理。</p>
+      </div>
+      <div class="feature-card" onclick="switchTab('categories')">
+        <div class="icon">📂</div>
+        <h3>議題の分類</h3>
+        <p>子育て・医療・防災など、分野から探せる。</p>
+      </div>
+      <div class="feature-card" onclick="switchTab('glossary')">
+        <div class="icon">📖</div>
+        <h3>用語の解説</h3>
+        <p>「議案」「補正予算」など、難しい言葉を解説。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 定例会一覧 -->
+  <section class="panel" id="panel-sessions">
+    <div class="intro-card">
+      <h2>📅 2023年からの全議会</h2>
+      <p>朝日町議会は3月・6月・9月・12月の年4回「定例会」が開かれ、本会議はYouTube Liveで中継されます。</p>
+      <p style="font-size:0.82rem; color:#92400e; margin-top:8px;">⚠ YouTube中継の録画は配信日からおおむね3か月で視聴できなくなります。各議会の詳細な発言内容は、朝日町議会の<strong>会議録</strong>（公式データベース）でご確認いただけます。</p>
+    </div>
+    <div class="session-list" id="session-list"></div>
+  </section>
+
+  <!-- 議会別Q&A -->
+  <section class="panel" id="panel-qa">
+    <div class="intro-card">
+      <h2>💬 議会ごとの 質問と答え</h2>
+      <p>各議会で議員さんが町長や担当課に質問した内容と、その答えをまとめています。議会の見出しをクリックすると、その議会のQ&Aが開きます。</p>
+    </div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="qa-search" placeholder="キーワードで検索（例：子育て、駅、太陽光）">
+    </div>
+    <div id="qa-container"></div>
+  </section>
+
+  <!-- 議題分類 -->
+  <section class="panel" id="panel-categories">
+    <div class="intro-card">
+      <h2>📂 議題を分野別に見る</h2>
+      <p>カードをクリックすると、その分野の質問・答えだけが表示されます。</p>
+    </div>
+    <div class="category-grid" id="category-grid"></div>
+    <div style="margin-top: 20px;">
+      <div class="filter-bar" id="topic-filter"></div>
+      <div class="topic-list" id="topic-list"></div>
+    </div>
+  </section>
+
+  <!-- 用語解説 -->
+  <section class="panel" id="panel-glossary">
+    <div class="intro-card">
+      <h2>📖 議会用語の解説</h2>
+      <p>議会でよく出てくる難しい言葉を、わかりやすく説明します。</p>
+    </div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="glossary-search" placeholder="用語を検索（例：補正予算）">
+    </div>
+    <div class="glossary-grid" id="glossary-grid"></div>
+  </section>
+</main>
+
+<!-- 議員詳細モーダル -->
+<div class="modal-overlay" id="member-modal" onclick="if(event.target===this) closeMemberModal()">
+  <div class="modal-box" id="member-modal-box">
+    <!-- 内容はJSで生成 -->
+  </div>
+</div>
+
+<footer>
+  <p>📌 情報源：<a href="https://www.town.asahi.toyama.dbsr.jp/" target="_blank">朝日町議会会議録検索（公式データベース）</a></p>
+  <p style="margin-top:6px;"><a href="https://www.town.asahi.toyama.jp/soshiki/gikai/1504614240913.html" target="_blank">議会中継・録画配信ページ</a> ｜ <a href="https://www.town.asahi.toyama.jp/soshiki/gikai/index.html" target="_blank">朝日町議会事務局</a></p>
+  <p style="margin-top:6px;">朝日町役場 議会事務局　〒939-0793 富山県下新川郡朝日町道下1133　TEL: 0765-83-1100</p>
+  <p style="margin-top:6px; color:#9ca3af;">※このアプリは町民向けの情報整理ツールです。正確な発言内容は朝日町議会の会議録をご確認ください。</p>
+</footer>
+
+<script>
+// ===== 議員データ =====
+const members = [
+  { seat: 1, name: "由井　崇", furigana: "よしい たかし", terms: 1, party: "無所属", kaiha: "青雲" },
+  { seat: 2, name: "善田　奈緒", furigana: "ぜんだ なお", terms: 1, party: "無所属", kaiha: "未来" },
+  { seat: 3, name: "吉江　昌宏", furigana: "よしえ まさひろ", terms: 1, party: "無所属", kaiha: "グループ22" },
+  { seat: 4, name: "寺西　泉", furigana: "てらにし いずみ", terms: 2, party: "自由民主党", kaiha: "青雲" },
+  { seat: 5, name: "石原　孝之", furigana: "いしはら たかゆき", terms: 2, party: "自由民主党", kaiha: "グループ22", role: "副議長" },
+  { seat: 6, name: "清水　眞人", furigana: "しみず まさと", terms: 3, party: "無所属", kaiha: "一歩会" },
+  { seat: 7, name: "大井　光男", furigana: "おおい みつお", terms: 3, party: "無所属", kaiha: "一歩会" },
+  { seat: 8, name: "加藤　好進", furigana: "かとう こうしん", terms: 4, party: "自由民主党", kaiha: "グループ22" },
+  { seat: 9, name: "西岡　良則", furigana: "にしおか よしのり", terms: 4, party: "自由民主党", kaiha: "未来" },
+  { seat: 10, name: "水野　仁士", furigana: "みずの ひとし", terms: 6, party: "自由民主党", kaiha: "青雲", role: "議長" }
+];
+const kaihaColors = { "青雲": "#2563eb", "未来": "#7c3aed", "グループ22": "#0891b2", "一歩会": "#dc2626" };
+
+// ===== 定例会データ（2023年〜2026年・YouTube中継ベース） =====
+const broadcastBase = "https://www.town.asahi.toyama.jp/soshiki/gikai/1504614240913.html";
+const minutesBase = "https://www.town.asahi.toyama.dbsr.jp/";
+const TODAY = new Date("2026-05-30");
+function minutesUrl(start, end) {
+  // 朝日町議会会議録検索データベース（トップページ：直近の議会一覧から各議会の会議録にアクセス可）
+  return minutesBase;
+}
+function broadcastStatus(endDate) {
+  // YouTube中継は配信日から3ヶ月程度視聴可能
+  const end = new Date(endDate);
+  const expireDate = new Date(end);
+  expireDate.setMonth(expireDate.getMonth() + 3);
+  if (TODAY < end) return { type: "upcoming", label: "📡 中継予定", color: "#16a34a" };
+  if (TODAY <= expireDate) return { type: "live", label: "▶ YouTube視聴可能", color: "#dc2626" };
+  return { type: "expired", label: "視聴期間終了", color: "#9ca3af" };
+}
+
+const sessions = [
+  { id: "r5-3", name: "令和5年3月定例会", date: "2023年3月1日〜16日", year: 2023, endDate: "2023-03-16",
+    summary: "令和5年度一般会計予算79億1,279万円を可決。下山用水組合議員12名選出。コロナ5類移行への対応、敷地内薬局、新美術館改修などを審議。",
+    bills: 34, questions: 9, minutes: minutesUrl("2023-03-01", "2023-03-16") },
+  { id: "r5-6", name: "令和5年6月定例会", date: "2023年6月1日〜15日", year: 2023, endDate: "2023-06-15",
+    summary: "農業委員14名の選出に同意。物価高騰対応支援給付金、再生可能エネルギー、移住定住推進などを議論。あさひ未来パークの構想が動き始める。",
+    bills: 21, questions: 9, minutes: minutesUrl("2023-06-01", "2023-06-15") },
+  { id: "r5-9", name: "令和5年9月定例会", date: "2023年9月7日〜22日", year: 2023, endDate: "2023-09-22",
+    summary: "令和4年度決算（歳入93億9,706万円）を全員賛成で認定。教育委員1名同意。消防団組織再編、緑内障検診、サンリーナ改修などを議論。",
+    bills: 13, questions: 9, minutes: minutesUrl("2023-09-07", "2023-09-22") },
+  { id: "r5-12", name: "令和5年12月定例会", date: "2023年12月4日〜18日", year: 2023, endDate: "2023-12-18",
+    summary: "農業経営安定対策、物価高騰対応重点支援給付金、固定資産評価審査委員1名同意。下水道事業の設置条例制定。LoCoPiあさひまち見守りサービスなどを議論。",
+    bills: 13, questions: 8, minutes: minutesUrl("2023-12-04", "2023-12-18") },
+  { id: "r6-3", name: "令和6年3月定例会", date: "2024年3月4日〜19日", year: 2024, endDate: "2024-03-19",
+    summary: "令和6年度一般会計予算90億9,322万7千円を可決。町制施行70周年記念事業、泊駅南公園整備、副町長・教育長同意。能登半島地震を踏まえた防災対策を議論。",
+    bills: 31, questions: 9, minutes: minutesUrl("2024-03-04", "2024-03-19") },
+  { id: "r6-4ri", name: "令和6年4月臨時会", date: "2024年4月16日", year: 2024, endDate: "2024-04-16",
+    summary: "デジタル田園都市国家構想タイプ3の交付金を活用したDX推進事業（1億812万円）等を含む令和6年度一般会計補正予算（第1号）1億2,418万円を全員賛成で可決。",
+    bills: 1, questions: 0, minutes: minutesUrl("2024-04-16", "2024-04-16") },
+  { id: "r6-6", name: "令和6年6月定例会", date: "2024年6月6日〜20日", year: 2024, endDate: "2024-06-20",
+    summary: "「消滅可能性自治体」公表への対応、生成AIパイロット指定校事業、定額減税・調整給付金、永年勤続表彰（清水・大井議員）。緑の基本計画策定などを議論。",
+    bills: 18, questions: 9, minutes: minutesUrl("2024-06-06", "2024-06-20") },
+  { id: "r6-8ri", name: "令和6年8月臨時会", date: "2024年8月6日", year: 2024, endDate: "2024-08-06",
+    summary: "企業立地奨励事業（1億9,449万円）・公共サービスパス事業（500万円）等を含む令和6年度一般会計補正予算（第5号）2億376万円を全員賛成で可決。町制施行70周年記念式典の終了を報告。",
+    bills: 1, questions: 0, minutes: minutesUrl("2024-08-06", "2024-08-06") },
+  { id: "r6-9", name: "令和6年9月定例会", date: "2024年9月5日〜20日", year: 2024, endDate: "2024-09-20",
+    summary: "令和5年度決算（歳入96億1,634万円）を認定。組織決定で水野議長・石原副議長就任。サル獣害対策、新人口ビジョン策定、避難所環境などを議論。",
+    bills: 17, questions: 10, minutes: minutesUrl("2024-09-05", "2024-09-20") },
+  { id: "r6-10ri", name: "令和6年10月臨時会", date: "2024年10月11日", year: 2024, endDate: "2024-10-11",
+    summary: "衆議院議員総選挙（10月27日）費用896万円の専決処分承認、浜草野地内工場用地造成工事・文化体育センター第1体育館改修工事の請負契約締結（計約4億1,668万円）を全員賛成で可決。",
+    bills: 3, questions: 0, minutes: minutesUrl("2024-10-11", "2024-10-11") },
+  { id: "r6-12", name: "令和6年12月定例会", date: "2024年12月5日〜19日", year: 2024, endDate: "2024-12-19",
+    summary: "ひきこもり支援強化・核兵器禁止条約意見書を全員賛成で可決。あさひ総合病院寄付講座更新、特定空家対策、がごめ昆布ブランド化などを議論。",
+    bills: 13, questions: 9, minutes: minutesUrl("2024-12-05", "2024-12-19") },
+  { id: "r7-3", name: "令和7年3月定例会", date: "2025年3月3日〜17日", year: 2025, endDate: "2025-03-17",
+    summary: "令和7年度一般会計予算90億5,118万7千円を可決（前年比0.5%減）。空家対策条例改正、町営住宅60歳未満単身入居可能化、ウニ畜養施設、わたしのライフプラン事業を議論。",
+    bills: 28, questions: 9, minutes: minutesUrl("2025-03-03", "2025-03-17") },
+  { id: "r7-6", name: "令和7年6月定例会", date: "2025年6月5日〜19日", year: 2025, endDate: "2025-06-19",
+    summary: "永年勤続表彰（西岡・加藤議員）。あさひ総合病院の患者個人情報紛失事案（577名分のSDカード）、下澤産業跡地太陽光発電事業、メロン・レタス特産化を議論。",
+    bills: 18, questions: 11, minutes: minutesUrl("2025-06-05", "2025-06-19") },
+  { id: "r7-9", name: "令和7年9月定例会", date: "2025年9月4日〜19日", year: 2025, endDate: "2025-09-19",
+    summary: "令和6年度決算（歳入101億2,886万円）を認定。能登半島地震を踏まえた議会業務継続計画（議会BCP）策定、あさひ総合病院への4億円支援、太陽光プロポーザル結果を審議。",
+    bills: 14, questions: 9, minutes: minutesUrl("2025-09-04", "2025-09-19") },
+  { id: "r7-10ri", name: "令和7年10月臨時会", date: "2025年10月9日", year: 2025, endDate: "2025-10-09",
+    summary: "老朽化した庁舎受水槽及び高架水槽の更新工事請負契約（株式会社氷見工業所・5,742万円、3社入札、落札率99.71%）を全員賛成で可決。工期は令和8年3月23日まで。",
+    bills: 1, questions: 0, minutes: minutesUrl("2025-10-09", "2025-10-09") },
+  { id: "r7-12", name: "令和7年12月定例会", date: "2025年12月4日〜18日", year: 2025, endDate: "2025-12-18",
+    summary: "「議員と語ろう！」住民対話結果を共有。物価高対応の子育て応援手当（児童1人2万円）、消防団員定年延長、太陽光地元説明会の状況などを議論。",
+    bills: 17, questions: 9, minutes: minutesUrl("2025-12-04", "2025-12-18") },
+  { id: "r8-1ri", name: "令和8年1月臨時会", date: "2026年1月20日", year: 2026, endDate: "2026-01-20",
+    summary: "令和7年度一般会計補正予算（第10号）1億6,769万円（コインプレミアムチャージ8,480万円・子育て応援手当6,495万円・消雪装置修繕1,046万円含む）と病院事業会計補正予算（第4号）401万円を全員賛成で可決。除雪費不足の専決処分（補正第9号）6,500万円も承認。",
+    bills: 3, questions: 0, minutes: minutesUrl("2026-01-20", "2026-01-20") },
+  { id: "r8-3", name: "令和8年3月定例会", date: "2026年3月4日〜19日", year: 2026, endDate: "2026-03-19",
+    summary: "令和8年度一般会計予算89億4,568万円を可決。第6次総合計画のスタート年。子育てステージアップ応援事業、まちづくり会社設立、泊駅バリアフリー化基本設計などを議論。",
+    bills: 23, questions: 9, minutes: minutesUrl("2026-03-04", "2026-03-19") },
+  { id: "r8-6", name: "令和8年6月定例会", date: "2026年6月16日〜26日", year: 2026, endDate: "2026-06-26",
+    summary: "【次回開催予定】開会（6/16）・代表質問（6/22）・一般質問（6/23）・閉会（6/26）。YouTube Liveで生中継予定。",
+    bills: 0, questions: 0, minutes: minutesUrl("2026-06-16", "2026-06-26"), upcoming: true }
+];
+
+// ===== カテゴリー =====
+const categories = [
+  { id: "budget", name: "予算・財政", icon: "💰", color: "#0891b2", desc: "町のお金の使い方・税金・決算" },
+  { id: "child", name: "子育て・教育", icon: "👶", color: "#ec4899", desc: "保育園・学校・子育て支援" },
+  { id: "medical", name: "医療・福祉", icon: "🏥", color: "#dc2626", desc: "あさひ総合病院・高齢者支援" },
+  { id: "disaster", name: "防災・安全", icon: "🚨", color: "#f59e0b", desc: "災害対策・避難所" },
+  { id: "infra", name: "インフラ・交通", icon: "🚉", color: "#7c3aed", desc: "道路・駅・水道・公共施設" },
+  { id: "env", name: "環境・エネルギー", icon: "🌱", color: "#16a34a", desc: "太陽光・風力発電・ゴミ処理" },
+  { id: "tourism", name: "観光・地域振興", icon: "🌸", color: "#db2777", desc: "春の四重奏・ヒスイ海岸・観光" },
+  { id: "council", name: "議会運営・町政全般", icon: "🏛", color: "#475569", desc: "議会改革・選挙・町長の方針" }
+];
+
+// ===== 議題データ（13議会・各議会の代表的なQ&A） =====
+const topics = [
+  // ========== 令和5年3月定例会 ==========
+  { s: "r5-3", c: "tourism", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "泊高校跡地の利活用、今後の予定は？",
+    q: "閉校から1年。県の企業誘致用地として整備されているが、空白期間が生じないよう、早期完成とアクセス道路整備をお願いしたい。",
+    a: "県において用地確定測量、校舎解体工事設計を実施。新田知事が首都圏や名古屋の企業立地セミナーで朝日町を紹介。2〜3社から用地について質問あり。",
+    e: "閉校した泊高校の跡地に企業を呼ぶための準備中。県も知事自ら企業誘致をPRしてくれています。" },
+  { s: "r5-3", c: "medical", sp: "寺西泉 議員（青雲）", an: "在宅介護支援センター長",
+    t: "介護人材不足、町の現状と課題は？",
+    q: "全国的に介護人材不足が問題。十分な介護サービスが提供できなくなることを危惧する。",
+    a: "ヘルパーが不足し、これまで10人で回していた業務を4人体制で対応。慢性的な人員不足。提案として大手介護施設の誘致も検討したい。",
+    e: "介護で働く人が足りなくて、サービスが受けられない人が出るかも。大手介護会社の誘致も視野に。" },
+  { s: "r5-3", c: "budget", sp: "石原孝之 議員（グループ22）", an: "町長",
+    t: "新年度のDX推進事業は何をする？",
+    q: "DX推進特別枠に2,300万円の予算。どんな事業を行うのか？",
+    a: "公式LINEに住民票や税証明書のオンライン申請機能を追加。役場窓口で行う申請の一部を公式LINEで完結できるよう「持ち運べる役場」の機能を高める。",
+    e: "公式LINEで住民票が取れたり、税金の証明書を申請できるようになる予定。役場に行かなくていい時代へ。" },
+  { s: "r5-3", c: "disaster", sp: "西岡良則 議員（未来）", an: "総務政策課長",
+    t: "災害避難所にマンホールトイレを設置できないか？",
+    q: "水洗トイレに近い感覚で使え、衛生環境が確保できる。設置の必要性は？",
+    a: "携帯・簡易トイレを6,000回分備蓄済み。マンホールトイレの有益性は認識しているが、避難所環境や投資効果を見極めて中長期的に研究・検討したい。",
+    e: "災害時に水洗のように使える「マンホールトイレ」を作れないか？という提案。町は今すぐは難しいが検討する方針。" },
+  { s: "r5-3", c: "tourism", sp: "大井光男 議員（一歩会）", an: "住民・子ども課長",
+    t: "移住相談の状況は？",
+    q: "朝日町移住定住促進業務委託事業の実績は？",
+    a: "令和3年度の移住相談150人に対し、令和4年度は既に181人と31人増。空き家相談164件、過去最多。空き家売買20件成立。",
+    e: "朝日町への移住相談がどんどん増えています。空き家を借りたり買ったりする話も増加中。" },
+  { s: "r5-3", c: "medical", sp: "清水眞人 議員（一歩会）", an: "健康課長",
+    t: "新規の訪問入浴介護支援事業とは？",
+    q: "入善町とも連携した訪問入浴サービス事業の内容は？",
+    a: "在宅生活が困難な重度身体障害者等に簡易浴槽を運び入浴サービスを提供。入善町と協議し新たに支援事業を開始。",
+    e: "重い障害があってお風呂に入れない人のために、自宅に簡易お風呂を運ぶサービスを開始。入善町と連携。" },
+
+  // ========== 令和5年6月定例会 ==========
+  { s: "r5-6", c: "council", sp: "吉江昌宏 議員（グループ22）", an: "町長",
+    t: "町職員に過度な負担、人員確保は適切か？",
+    q: "様々な取り組みを行っているが、新しい取り組みには地域おこし協力隊や会計年度任用職員も視野に入れているか？",
+    a: "中長期的に職員の必要性や構成バランスに配慮しながら確保に努めている。新しい取り組みは一過性のものもあり一丸となって対応するのが原則。",
+    e: "新しいことをやるたびに職員の仕事が増えて大変。外部人材も使いながら無理なく進めていく方針。" },
+  { s: "r5-6", c: "infra", sp: "吉江昌宏 議員（グループ22）", an: "商工観光課長",
+    t: "あさひまちバスを入善町に乗り入れできない？",
+    q: "あさひ総合病院受診者の利便性向上や学生の通学手段確保のため、入善町への乗り入れを検討して。",
+    a: "効果的手段の一つだが、自治体運営の交通サービスは隣接市町の既存交通事業者との合意が必要。実現のハードルは高い。",
+    e: "となりの入善町まで町バスを延ばしてほしいという要望。タクシー会社などとの調整が難しく、すぐには無理。" },
+  { s: "r5-6", c: "child", sp: "善田奈緒 議員（未来）", an: "総務政策課長",
+    t: "町職員の明確なビジョンは示せている？",
+    q: "町民とのまちづくりへの意識に温度差が生じているのでは？",
+    a: "第5次総合計画の各部署でKPIを設定し取り組んでいる。横断的な対応も行い、社会情勢の変化には計画の見直しで対応している。",
+    e: "「町職員一人ひとりが朝日町をどうしたいか、ちゃんとビジョンを持って働いてる？」という指摘に、町は計画に沿ってやっていますと回答。" },
+  { s: "r5-6", c: "budget", sp: "善田奈緒 議員（未来）", an: "町長",
+    t: "デジタル田園都市国家構想で実現する未来像は？",
+    q: "約2億9,000万円の交付金で何を目指す？",
+    a: "山積する地域課題をデジタルで解決し、住民生活の質の向上と人口減少社会における持続可能な公共サービスの仕組みを目指す。",
+    e: "国からの大きな補助金（約2.9億円）を使って、デジタルで暮らしを良くする取り組みを進めます。" },
+  { s: "r5-6", c: "tourism", sp: "大井光男 議員（一歩会）", an: "教育委員会事務局長",
+    t: "新美術館の展示室はどう使う？",
+    q: "3つの展示室の詳細な使用方法、年間来館者の見込みは？",
+    a: "第1展示室は年4回程度の特別展、第2展示室は竹久夢二など館蔵品の常設、第3展示室は若手芸術家の個展スペース。年5,450人を見込む。",
+    e: "新しい美術館は3部屋構成。有名作家の特別展、町の所蔵品、若手芸術家の個展に分けて使います。" },
+  { s: "r5-6", c: "env", sp: "西岡良則 議員（未来）", an: "農林水産課長",
+    t: "ウニ陸上畜養の考えは？",
+    q: "磯焼けの原因のウニを陸上で育てて販売できる事業について町の考えは？",
+    a: "東草野海岸でテングサが磯焼け。3回のウニ間引き大作戦実施。藻場再生研究に取り組んでもらいたい。",
+    e: "海藻がなくなる磯焼けの原因がウニ。これを駆除して育てて売る循環型ビジネスを朝日町でも検討中。" },
+
+  // ========== 令和5年9月定例会 ==========
+  { s: "r5-9", c: "disaster", sp: "西岡良則 議員（未来）", an: "消防署長",
+    t: "消防団組織を再編？",
+    q: "人口減少と高齢化で消防団員の確保が困難。新たな組織体制は？",
+    a: "6分団から自治振興会単位の5分団に再編成。女性ならではの視点を活かす「女性分団」を新設予定。",
+    e: "町の消防団を6つから5つに統合。女性だけの分団も新しく作って、より柔軟な防災体制に。" },
+  { s: "r5-9", c: "budget", sp: "清水眞人 議員（一歩会）", an: "財政管理課長",
+    t: "町の借金返済の重さ、シミュレーション通り？",
+    q: "令和4年度決算の実質公債費比率は11.2%で前年より0.9ポイント上昇。違いはあったか？",
+    a: "町の財政シミュレーションとほぼ同様の数値。各健全化指標は基準を上回っておらず健全な値である。",
+    e: "町が借金返済に使うお金の割合は、前年より少し増えたが想定範囲内。財政は健全と言えます。" },
+  { s: "r5-9", c: "tourism", sp: "清水眞人 議員（一歩会）", an: "教育委員会事務局長",
+    t: "ふるさと美術館の入館者数は？",
+    q: "新美術館オープン後、来館者数や共通鑑賞券の効果は？",
+    a: "7月オープン後8月末で5,596人。10月までに移転前年間入館者数を上回る見込み。まいぶんKANとの共通券販売も入場者数増加に貢献。",
+    e: "新ふるさと美術館が好評。2ヶ月で前の美術館の年間入場者数を超える勢い。" },
+  { s: "r5-9", c: "child", sp: "石原孝之 議員（グループ22）", an: "健康課長",
+    t: "緑内障検診を導入できない？",
+    q: "40歳以上の20人に1人が緑内障。検診の実施と費用助成を検討してほしい。",
+    a: "現段階では健康増進法に基づかない緑内障検診の実施及び費用負担は考えていない。今後は啓発を行い情報発信に努めたい。",
+    e: "緑内障の検診を町でやってほしいという要望。今のところ町独自では実施せず、啓発を強化する方針。" },
+  { s: "r5-9", c: "disaster", sp: "石原孝之 議員（グループ22）", an: "教育委員会事務局長",
+    t: "学校体育館にエアコン設置を？",
+    q: "猛暑で熱中症リスクが高い。避難所も兼ねる体育館への空調設置は？",
+    a: "体育館のエアコン設置は大変高額。財政的観点や費用対効果を考えると難しい面がある。様々な観点から研究したい。",
+    e: "体育館にエアコンを付けてほしいが、お金がかかりすぎて当時は実現困難。後の議会で再度検討されます。" },
+  { s: "r5-9", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "泊駅南公園の事業詳細は？",
+    q: "公園の規模、購入土地面積、全体工事費は？",
+    a: "全体面積1万5,000㎡、組合から購入する面積約9,000㎡、全体工事費約9.2億円（土木3.2億、遊具1.6億、建築設備2億、その他他）。",
+    e: "新しくできる「あさひ未来パーク」は約1.5ヘクタールの大きさで、約9.2億円かかる大型プロジェクトです。" },
+  { s: "r5-9", c: "child", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長",
+    t: "「こどもまんなか応援サポーター」宣言で何を？",
+    q: "町が宣言した「こどもまんなか応援サポーター」、その実現像は？",
+    a: "子ども最善の利益を第一に、自己肯定感や有用感を高め幸せな成長ができるよう、子どもの居場所づくりは重要。町内施設も居場所の一つになれば。",
+    e: "「こどもまんなか」を町として宣言。子どもが安心して過ごせる居場所を町中に作ろうとしています。" },
+
+  // ========== 令和5年12月定例会 ==========
+  { s: "r5-12", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "泊駅南公園の土地、値段はいつ決まる？",
+    q: "9月議会で「検討中」と答弁された公園用地取得価格の進捗は？",
+    a: "概算事業費に基づき不動産鑑定士に依頼し算定中。組合と交渉中。土地区画整理事業のスケジュール上、令和7年度に契約、令和8年度に町の土地になる予定。",
+    e: "公園の土地代を町がいくら払うか、まだ決まっていません。実際に町の土地になるのは2026年度の予定。" },
+  { s: "r5-12", c: "tourism", sp: "大井光男 議員（一歩会）", an: "町長",
+    t: "町にビジネスホテルを誘致できない？",
+    q: "視察客が増えているが朝日町にはビジネス型宿泊施設がない。コンテナホテルなどの誘致は？",
+    a: "全国的な流れを見ながら朝日町に見合う形態を研究する。商業施設や宿泊施設等の誘致もお話があれば積極的に進めたい。",
+    e: "視察に来る人が増えているのに泊まる場所がない。コンテナ型ホテルなど含めて検討中。" },
+  { s: "r5-12", c: "budget", sp: "由井崇 議員（青雲）", an: "みんなで未来！課長",
+    t: "LoCoPiあさひまちでできることは？",
+    q: "令和6年1月利用開始、具体的にどんなことに使える？",
+    a: "子どもの見守りサービス（カードタッチで保護者に通知）、高齢者の通院や介護教室時の安否確認、デジタル化されたバス券、まめなけ市場での買い物などを検討。",
+    e: "マイナンバーカードを使って、子どもの登下校通知、お年寄りの見守り、バスの利用などが一枚でできるサービス。" },
+  { s: "r5-12", c: "tourism", sp: "由井崇 議員（青雲）", an: "商工観光課長",
+    t: "修学旅行受入れの取り組みは？",
+    q: "コロナで止まった民泊修学旅行、今後の受入れ体制は？",
+    a: "今年5月に大阪市大正中学校から124名受入れ。今後は民間宿泊施設の活用と体験学習を併せたスタイルで誘致も視野に。",
+    e: "修学旅行で朝日町に来てもらう取り組みを再開。民家に泊まる「民泊」だけでなく、宿泊施設＋体験も。" },
+  { s: "r5-12", c: "council", sp: "寺西泉 議員（青雲）", an: "町長",
+    t: "町民とどう一緒に町を作る？",
+    q: "町職員や町長主導ではなく、町民自らが企画・発案・行動する町に。どう歩むのか？",
+    a: "町民がまちづくりの主役と実感できるよう信頼と対話で取組を進める。70周年を未来への新たなスタートアップの年として施策を展開したい。",
+    e: "町が主役ではなく、町民みんなが主役。一緒に楽しい朝日町を作っていこう、という方針を再確認。" },
+  { s: "r5-12", c: "child", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "メタバース婚活ってどう？",
+    q: "デジタル時代の今、仮想空間での婚活イベントを朝日町でやってみないか？",
+    a: "「アバター」を使った仮想空間内交流。複数自治体で実施されており、内面重視のためカップル成立率も高い。研究に努めたい。",
+    e: "VRで恋活！？ メタバース上で「アバター」になって出会う婚活イベント。朝日町でも検討中（後に実施）。" },
+  { s: "r5-12", c: "budget", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "雇用創出奨励金、町外の人にも？",
+    q: "町内の事業者に勤務する就業者が対象だが、町外者にも拡大できないか？",
+    a: "町外からの通勤者にも対象を拡大する方向で、交付要件や支給方法の見直し等を検討。令和6年度以降の予算確保に努める。",
+    e: "町の企業に勤める人にお金を出す制度を、朝日町外から通う人にも広げるか検討中。" },
+  { s: "r5-12", c: "budget", sp: "清水眞人 議員（一歩会）", an: "健康課長",
+    t: "住民税非課税世帯への7万円給付はいつ？",
+    q: "国の補正予算で1世帯7万円を給付。早期給付が求められるが？",
+    a: "12月議会最終日に補正予算として追加提案。口座登録のある世帯はプッシュ型振込で手続簡素化。年末は難しいが早期支給を準備中。",
+    e: "物価高対策で非課税世帯に7万円。役所の手続きを簡素にして、できるだけ早く渡せるよう準備します。" },
+
+  // ========== 令和6年3月定例会 ==========
+  { s: "r6-3", c: "disaster", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "町民の防災意識をどう高める？",
+    q: "能登半島地震を受け、防災教室や防災士育成、地区防災計画など、優先順位をつけて取り組むべき。",
+    a: "防災士会との連携研修、自主防災組織への助言、女性の防災士育成も含め、防災活動の推進に必要な対策を積極的に講じたい。",
+    e: "能登半島地震を受けて、町民みんなの防災意識を高めるため、研修や女性防災士育成を強化します。" },
+  { s: "r6-3", c: "infra", sp: "石原孝之 議員（グループ22）", an: "建設課長",
+    t: "泊駅の南北連絡線、いつ着工？",
+    q: "朝日町立地適正化計画に基づく南北連絡線の事業化、駅舎バリアフリー化の計画は？",
+    a: "地下道形式から高架形式に変更。あいの風とやま鉄道がエレベーター付き乗降施設を整備。令和6年に基本設計、令和9年度に工事着手予定。",
+    e: "泊駅の南北を結ぶ新しい通路を作って、エレベーターも付けます。設計は2024年から、工事は2027年度から。" },
+  { s: "r6-3", c: "child", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長 / みんなで未来！課長",
+    t: "移住定住の重点施策、地域おこし協力隊は？",
+    q: "重点施策と地域おこし協力隊の積極受入れの方針は？",
+    a: "新規事業として朝日町結婚新生活支援事業（引越し費用補助）。地域おこし協力隊はデジタル2名、農業3名、林業1名の採用を計画。",
+    e: "結婚で朝日町に引っ越す人に補助金を新設！地域おこし協力隊も6人体制に拡大予定。" },
+  { s: "r6-3", c: "infra", sp: "清水眞人 議員（一歩会）", an: "建設課長",
+    t: "南北連絡線で何が変わる？政策効果は？",
+    q: "4,000万円計上の基本設計、利用者数の見通し、整備効果は？",
+    a: "泊駅のアクセス向上と利便性向上、駅南北一体まちづくりへの寄与。バリアフリー化で利用控えていた方の利用促進、街なか活性化につながる。",
+    e: "新しい通路ができれば、駅の南北の行き来が楽になり、街なかにも人が来やすくなります。" },
+  { s: "r6-3", c: "disaster", sp: "吉江昌宏 議員（グループ22）", an: "総務政策課長",
+    t: "能登半島地震後、住民にアンケートを？",
+    q: "避難された一人一人の意見を収集し、今後のハザードマップに反映させるべき。",
+    a: "県と重複しない内容で実施に向けて検討。79の自主防災組織への検証もすでに実施中。",
+    e: "震災で避難した町民の生の声を集めるアンケートを今後検討。次の防災に活かします。" },
+  { s: "r6-3", c: "medical", sp: "西岡良則 議員（未来）", an: "あさひ総合病院事務部長",
+    t: "あさひ総合病院の医療人材確保は？",
+    q: "課題解消の方策、医療機器更新計画、人材確保状況は？",
+    a: "看護学生修学資金貸与制度で34名貸与、23名を職員採用。寄附講座開設、医療職処遇改善で経営改善を推進。",
+    e: "看護学生に奨学金を出して、卒業後に町立病院で働いてもらう仕組みを推進中。" },
+  { s: "r6-3", c: "env", sp: "水野仁士 議員（青雲）", an: "農林水産課長",
+    t: "森林環境譲与税はどう使う？",
+    q: "毎年入る譲与税や1,400万円の基金の使い道は？",
+    a: "3年サイクルで意向調査→集積計画→森林管理。新川森林組合へ高性能林業機械ハーベスタの購入補助。",
+    e: "全国民が毎年1,000円払う森林税のお金で、朝日町の森を計画的に整備していきます。" },
+  { s: "r6-3", c: "tourism", sp: "由井崇 議員（青雲）", an: "商工観光課長",
+    t: "舟川の桜並木、将来どうする？",
+    q: "桜の老齢化、植え替えも含め樹木管理対策が必要では？",
+    a: "現状の桜並木は県管理の河川堤防のため同じ場所の植え替えはハードルが高い。当面は維持を継続しつつ、地元町内会と方向性を見出したい。",
+    e: "「春の四重奏」の桜が老齢化。植え替えが必要だが、堤防上のため簡単に植え替えできない難題。" },
+
+  // ========== 令和6年6月定例会 ==========
+  { s: "r6-6", c: "council", sp: "吉江昌宏 議員（グループ22）", an: "町長",
+    t: "「消滅可能性自治体」公表、町の見解は？",
+    q: "人口戦略会議が朝日町を消滅可能性自治体に再分類。若年女性人口の減少率は前回より改善とのことだが？",
+    a: "減少率は65.8%→64%と若干改善。「町を消滅させない」気持ちで10年間取り組んできた。富山大学の分析でも約14%改善（上振れ）し、施策の成果が出ている。",
+    e: "「人口が消えるかも」と国に言われた朝日町。10年で減少率は少し改善しています。" },
+  { s: "r6-6", c: "env", sp: "西岡良則 議員（未来）", an: "町長",
+    t: "緑の基本計画とは何？",
+    q: "目標や施策を定める緑のマスタープランを策定する目的は？",
+    a: "公園施設の経年劣化、桜並木の老齢化、新たに整備の泊駅南公園など、状況変化や課題に対応するため、地域で求められる公園の将来像を検討する。",
+    e: "町の公園や緑地をこれからどう守っていくか、長期計画を作ります。" },
+  { s: "r6-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "「春の四重奏」の協力金の総額は？",
+    q: "今年からシャトルバス利用者から協力金を募集。総額や使途は？",
+    a: "3月25日〜4月17日の24日間で総額620万6,934円の協力金。桜並木の管理や運営事業費の一部に充てる。",
+    e: "桜の名所「春の四重奏」のシャトルバス利用客から620万円の協力金が集まり、桜の管理に使います。" },
+  { s: "r6-6", c: "budget", sp: "大井光男 議員（一歩会）", an: "みんなで未来！課長",
+    t: "中学校卒業祝金、登録者だけ対象は？",
+    q: "1万円分のデジタル商品券給付、LoCoPiあさひまち登録者だけが対象は不公平では？",
+    a: "町内活性化やマイナンバーカード普及向上、子育て世帯応援の目的。卒業生77名中26名（33.8%）が受給済。再考の意向は示さず。",
+    e: "中学校卒業祝い1万円が、町のデジタルサービス登録者のみ。「不公平」との議員の指摘。" },
+  { s: "r6-6", c: "tourism", sp: "大井光男 議員（一歩会）", an: "教育委員会事務局長",
+    t: "不動堂遺跡、樹木を無許可で剪定？",
+    q: "縄文時代の遺跡周りの木々を一律剪定。県から文化財保護法違反を指摘されたが今後どうする？",
+    a: "事前に現状変更許可を申請すべきと指摘を受け、事後に申請し許可通知あり。今後は県教育委員会と逐一事前相談できる体制とする。",
+    e: "国指定の縄文時代の遺跡で、許可なく木を切ってしまった問題。今後は事前申請を徹底します。" },
+  { s: "r6-6", c: "disaster", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "防災DXに積極的に取り組むべき",
+    q: "教育DX、医療DXと同様、防災DXも進めるべき。町の方針は？",
+    a: "デジタル田園都市国家構想交付金で防災データ連携を推進。マイナンバーカード（LoCoPi）を活用した災害時の避難所管理や住民の安否確認を検討中。",
+    e: "災害時にデジタルで何ができるか研究中。マイナンバーカードで避難所受付、家族への通知などを目指します。" },
+  { s: "r6-6", c: "child", sp: "善田奈緒 議員（未来）", an: "教育長",
+    t: "教育長3期目で何を成し遂げる？",
+    q: "学校教育分野で重点的に取り組むことは？",
+    a: "①教員の働き方改革の推進、②情報活用能力の育成、③子どもたちのリアルな体験活動の推進、の3点を重点的に取り組む。",
+    e: "教育長は「先生の働き方改革」「ICT活用力」「リアル体験」の3つを大事にします。" },
+  { s: "r6-6", c: "budget", sp: "石原孝之 議員（グループ22）", an: "税務課長",
+    t: "定額減税の調整給付金、いつもらえる？",
+    q: "定額減税しきれない人への給付金、受取りまでの手続きは？",
+    a: "8月下旬〜9月上旬に確認書を送付。返信後、9月下旬から指定口座へ振り込み実施。",
+    e: "国の定額減税4万円を引ききれない人に、不足分を町から給付。秋頃に振込予定です。" },
+  { s: "r6-6", c: "council", sp: "清水眞人 議員（一歩会）", an: "総務政策課長",
+    t: "カスハラ対策、町の取り組みは？",
+    q: "町職員へのカスタマーハラスメント対策の進捗は？",
+    a: "若手職員対象の研修実施。録音機能付き電話機を数台設置。1対1ではなく複数で対応する方針。",
+    e: "町職員が役場で理不尽な要求を受ける問題に対応。研修や録音電話で職員を守ります。" },
+
+  // ========== 令和6年9月定例会 ==========
+  { s: "r6-9", c: "child", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長 / 教育委員会事務局長",
+    t: "災害時、子どもたちは誰がどこに避難？",
+    q: "平日昼間の大地震時、保護者と離れた子どもの避難はマニュアル化して保護者と共有を。",
+    a: "保育所安全計画に基づき避難訓練を月毎に実施。小中学校は震度4以上で保護者迎えまで教職員が安全管理し、あんしんメールで連絡。",
+    e: "保育園や学校が地震に遭ったとき、誰がどう子どもを避難させるか、マニュアル化されています。" },
+  { s: "r6-9", c: "council", sp: "清水眞人 議員（一歩会）", an: "町長 / 財政管理課長",
+    t: "新人口ビジョンはいつ完成？",
+    q: "新たな人口ビジョン策定の進捗と、財政運営への影響予測は？",
+    a: "今年6月に業者選定、今年度中に作成、令和7年度に審議会を経て完成予定。企業誘致やLoCoPiで税収確保に努める。",
+    e: "町の今後の人口予測を作り直し中。これに基づいて新しい総合計画も作ります。" },
+  { s: "r6-9", c: "disaster", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "避難所の鍵ボックス、どう運用？",
+    q: "暗証番号で解錠する鍵ボックスの運用は？",
+    a: "4月の人事異動で居住地考慮の職員構成に変更。第一参集職員が解錠を行い、施設の安全性確認後に開場する。",
+    e: "災害時、すぐに避難所を開けられるように、近所に住む職員が暗証番号で鍵を開ける仕組み。" },
+  { s: "r6-9", c: "disaster", sp: "寺西泉 議員（青雲）", an: "総務政策課長 / 町長",
+    t: "避難所にエアコン設置を",
+    q: "夏の災害時、避難所の環境確保のためエアコン設置が必要では？",
+    a: "全避難所に設置は多額の費用、電力供給不安も。簡易的な空調設備も含め慎重に検討。有利な財源確保の視点から研究する。",
+    e: "夏に避難所が暑くて命にかかわる問題。エアコン設置は高額だが、補助金活用で検討中。" },
+  { s: "r6-9", c: "env", sp: "石原孝之 議員（グループ22）", an: "農林水産課長",
+    t: "ニホンザル被害、本気の対策を",
+    q: "家庭菜園被害で外に出られない。本気の対策は？",
+    a: "侵入防止対策・集落環境管理・捕獲の3対策を地域ぐるみで。発信機装着の雌から町内に7群455頭と推定。GPS活用なども検討。",
+    e: "町に455頭ものサルがいるという推計。GPSやドローンも使った対策を県と検討中。" },
+  { s: "r6-9", c: "child", sp: "由井崇 議員（青雲） / 水野仁士 議員（青雲）", an: "教育委員会事務局長",
+    t: "中学校の朝日岳登山を復活できない？",
+    q: "中学校行事として朝日岳登山が取消しになって何年も経過。北又など地域の自然を活かす登山は？",
+    a: "現在は大鷲山などの低山登山を実施中。北又は奥深い秘境としてキャンプも楽しめる。学校長から候補の一つとして十分検討できると話あり。",
+    e: "中学校の朝日岳登山が復活するかも？！北又エリアでの自然体験を学校が検討中。" },
+  { s: "r6-9", c: "disaster", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長 / 建設課長",
+    t: "空き家・放棄施設の防犯強化を",
+    q: "近隣住民と町、警察と話し合って防犯を強化すべきでは？",
+    a: "町内の空き家は661軒（3年前+69軒）。自治振興会や町内会と連絡を密にし、必要に応じて警察と相談する。",
+    e: "増え続ける空き家の防犯を、町・警察・住民が連携して進めます。" },
+  { s: "r6-9", c: "infra", sp: "西岡良則 議員（未来）", an: "建設課長",
+    t: "南北連絡線と区画整理を一体推進",
+    q: "南北連絡線の計画に合わせ事業を一体的に推進する方針は？",
+    a: "あいの風とやま鉄道がエレベーター付き乗降施設整備、町は南北連絡線を高架形式に変更。今後関係機関と協議。",
+    e: "新しい泊駅の通路、エレベーター、公園を全部一気に整備する方針。" },
+  { s: "r6-9", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "公園の土地代、結局いくらに？",
+    q: "土地購入価格が決まっていない公園予定地で大規模工事着手。土地はいくらで購入？",
+    a: "公園面積1万5,000㎡のうち調整池を除く約7,800㎡を約1億4,000万円で取得（1㎡約1万8,000円）。",
+    e: "公園用地の値段が決まりました。約7,800㎡で1.4億円、1平米あたり1.8万円。" },
+  { s: "r6-9", c: "tourism", sp: "石原孝之 議員（グループ22）", an: "農林水産課長",
+    t: "サル対策、研修会を山崎でも？",
+    q: "南保のサル研修会を山崎でも開催してほしい。",
+    a: "発信機の電波を活用した受信機の使い方を9月28日の研修会で習得予定。地域ぐるみの対策を強化。",
+    e: "サル対策の研修会、町内各地区で順番に開催していきます。" },
+
+  // ========== 令和6年12月定例会 ==========
+  { s: "r6-12", c: "budget", sp: "大井光男 議員（一歩会）", an: "みんなで未来！課長",
+    t: "LoCoPiあさひまち、何人が登録？",
+    q: "加入状況と利活用、プレミアムコイン事業の効果は？",
+    a: "11月末で2,439人が登録。30代5.7%〜60代15.9%。河野前デジタル大臣・新藤前経済再生大臣も視察。プレミアム10%付き地域内経済循環を実証。",
+    e: "町のデジタル通貨「LoCoPi」に約2,500人が登録。大臣も視察に来るほど注目されています。" },
+  { s: "r6-12", c: "medical", sp: "由井崇 議員（青雲）", an: "町長",
+    t: "あさひ総合病院、内科医師は？",
+    q: "富山大学附属病院との寄附講座、令和7年度以降も継続？",
+    a: "令和7年度から3年間継続更新。第1内科と総合診療科から2名体制で、地域医療充実と医療人材育成を目的とする。",
+    e: "町立病院の内科医師2名を富山大学から派遣してもらう仕組みを、あと3年延長します。" },
+  { s: "r6-12", c: "medical", sp: "由井崇 議員（青雲）", an: "健康課長",
+    t: "身寄りのない高齢者の支援は？",
+    q: "頼れる親族がいない高齢者が増加。検討すべき段階では？",
+    a: "緊急連絡カード作成で連絡先把握。次年度から終活について考える機会を設け、エンディングノートを活用し財産管理・相続を周知。",
+    e: "ひとり暮らしのお年寄りが安心して暮らせるよう、終活講座やエンディングノートで支援を強化します。" },
+  { s: "r6-12", c: "tourism", sp: "加藤好進 議員（グループ22）", an: "農林水産課長",
+    t: "がごめ昆布、朝日町ブランドに？",
+    q: "朝日町沖の養殖試験で良質昆布の評価。地場産品ブランド化の事業推進は？",
+    a: "県研究員から「外海の条件良く、潮の流れがあり、よどんでいない」と高評価。令和6年度は日本財団助成で規模拡大し継続。",
+    e: "朝日町沖で育てた「がごめ昆布」がとても美味しいと評価。新たな名産品を目指します。" },
+  { s: "r6-12", c: "infra", sp: "加藤好進 議員（グループ22）", an: "住民・子ども課長",
+    t: "特定空家、いつ取り壊す？",
+    q: "認定から年月が経つ特定空家。計画的に代執行を進めるべき？",
+    a: "現在8件の特定空家のうち5件は老朽化進行。空家等対策審議会で計画的除却を諮り了解を得た。令和7年度から順次執行。",
+    e: "倒壊しそうな空き家を町が強制的に壊す「代執行」を、来年度から順次始めます。" },
+  { s: "r6-12", c: "env", sp: "西岡良則 議員（未来）", an: "建設課長 / 消防署長",
+    t: "河川整備と有害鳥獣対策を一体に",
+    q: "雑木が茂る川は熊やイノシシの隠れ家。河川整備で対策を。",
+    a: "県管理の二級河川では計画的に土砂除去と雑木伐採を実施。町も毎年重要要望事項として県へ要望。新消防車両も泊分団に2月配備。",
+    e: "川の草木が伸びてクマの通り道に。県と協力して川の整備を進めます。消防車も新調。" },
+  { s: "r6-12", c: "budget", sp: "寺西泉 議員（青雲）", an: "みんなで未来！課長",
+    t: "あさひまちコインで町を元気に",
+    q: "全国初の取り組みであるあさひまちコイン。域内経済循環で町の活性化に？",
+    a: "全国初のマイナンバーカードを使った地域決済の仕組み。人口減少社会における持続可能な行政サービスの新しいスタイルとして展開。",
+    e: "全国初の試み「あさひまちコイン」で、町内のお金が町内で回る仕組みを作っています。" },
+  { s: "r6-12", c: "child", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "高校生の通学定期、補助できない？",
+    q: "通学定期購入費補助で子育て世代の経済的負担を軽減できないか？",
+    a: "町は高校生世代の新生活応援として、高校生の保護者を対象とした新たな支援を来年度予算に向け検討中。",
+    e: "高校に通うための定期券代を町が補助する仕組みを検討中。子育て世帯の負担軽減に。" },
+  { s: "r6-12", c: "child", sp: "善田奈緒 議員（未来）", an: "教育長",
+    t: "教育支援センター「あすなろ」が移転？",
+    q: "唯一の不登校児童の居場所「あすなろ」が役場付属棟に移転。心理的不安への対応は？",
+    a: "令和7年度中に役場付属棟2階に移転。スペースを24畳→34畳に拡大。利便性と動線を考慮した選定。",
+    e: "不登校の子どもの居場所「あすなろ」が役場の建物に移転。広くなって相談室も設置。" },
+  { s: "r6-12", c: "child", sp: "清水眞人 議員（一歩会）", an: "教育委員会事務局長",
+    t: "学校のクラス、適正な規模は？",
+    q: "あさひ野小とさみさと小で児童数が3倍違うが、人間力形成に課題はないか？",
+    a: "県内初の保小中一貫教育で連携教育を実施。合同授業や教育活動で他校児童との交流機会を確保し、人間力形成に支障なし。",
+    e: "2つの小学校で生徒数が大きく違うが、保育園〜小中で連携することで問題ないとの考え。" },
+  { s: "r6-12", c: "disaster", sp: "石原孝之 議員（グループ22）", an: "総務政策課長",
+    t: "避難所のエアコン、国の補助金で？",
+    q: "避難所での2次被害（関連死）防止のためエアコン設置を",
+    a: "国の補正予算で体育館空調設備の新たな交付金制度ができる予定。今後、国の動向を見極めながら、有利な財源確保の検討と簡易な空調設備の設置も含め研究したい。",
+    e: "国が体育館のエアコン設置に補助金を出す動きが。朝日町も活用に向けて検討中。" },
+
+  // ========== 令和7年3月定例会 ==========
+  { s: "r7-3", c: "tourism", sp: "寺西泉 議員（青雲）", an: "商工観光課長",
+    t: "ウニ畜養施設、いつできる？",
+    q: "ウニノミクスの蓄養施設、工事日程と雇用予定人数は？",
+    a: "2026年1月竣工、5月操業開始予定。当初16名雇用、2棟目・3棟目建設時には20名計画。",
+    e: "東草野海岸近くにウニの陸上養殖施設が建ちます。2026年5月から操業、地元雇用も。" },
+  { s: "r7-3", c: "tourism", sp: "寺西泉 議員（青雲）", an: "商工観光課長",
+    t: "ウニで朝日町の新特産品を",
+    q: "ウニを使った朝日町独自の特産品開発は？",
+    a: "「豊後の磯守」「長州の磯守」と同様、朝日町産ウニのブランド化を構想。「鮨といえば富山」戦略で富山湾鮨のネタやふるさと納税返礼品も期待。",
+    e: "朝日町で育てたウニを「朝日町ブランド」として全国に売り出す構想です。" },
+  { s: "r7-3", c: "budget", sp: "吉江昌宏 議員（グループ22）", an: "町長",
+    t: "令和7年度予算、どんな思い？",
+    q: "総額162億1,273万円、前年比2.8%減の予算編成への思いは？",
+    a: "第5次総合計画最終年、次期計画への橋渡し。「チャレンジしてこそチャンスを引き寄せる」精神で町の未来につながる予算とした。",
+    e: "5年計画の最後の年。チャレンジ精神で未来につながる予算を組みました。" },
+  { s: "r7-3", c: "council", sp: "善田奈緒 議員（未来）", an: "町長 / 総務政策課長",
+    t: "「新しい行政スタイル」って何？",
+    q: "町が取り組む新しい行政スタイルの目的、定義、成果と課題は？",
+    a: "官民連携や部署横断の対応。テーマごとに複数部署が連携する「DX分科会」を構成。職員業務負担の増加が課題。",
+    e: "縦割り行政を変えて、複数の部署と民間が協力する朝日町独自のスタイル。" },
+  { s: "r7-3", c: "council", sp: "善田奈緒 議員（未来）", an: "総務政策課長",
+    t: "町職員の離職・休職が増えている？",
+    q: "近年の業務変化が職員の離職や休職に影響していないか？",
+    a: "一般行政職の離職者は1名（R1）→6名（R5）と増加傾向。若手職員の離職が目立つ。キャリア観の変化やミスマッチが要因。",
+    e: "町職員の若手の離職が増加中。働き方の課題を町も認識しています。" },
+  { s: "r7-3", c: "medical", sp: "清水眞人 議員（一歩会）", an: "健康課長",
+    t: "在宅介護の希望者にサービスは届く？",
+    q: "全国的に介護サービス事業所の倒産が過去最高。在宅介護希望者の体制は？",
+    a: "希望される曜日や時間帯、回数など希望に沿えない場合があるが、真に必要なサービス提供は行えていると考えている。",
+    e: "介護を希望する人全員に希望通り提供は難しいが、本当に必要な人には届いています。" },
+  { s: "r7-3", c: "child", sp: "大井光男 議員（一歩会）", an: "教育委員会事務局長",
+    t: "タブレットで子どもの目は悪くなる？",
+    q: "小・中学生の視力低下、タブレット導入の影響は？",
+    a: "1人1台タブレット導入前後で大きな差はみられない。県内平均と同等。デジタルと紙の両方の利点を活かす方針。",
+    e: "「タブレットで目が悪くなる？」と心配されたが、導入前後で大きな差はなしと判明。" },
+  { s: "r7-3", c: "infra", sp: "西岡良則 議員（未来）", an: "建設課長",
+    t: "あさひ未来パーク、令和8年度完成？",
+    q: "泊駅南公園整備の令和7年度工事概要と進捗は？",
+    a: "令和6年度は造成、電気、給排水、噴水、トイレ棟、休憩施設の工事。令和7年度は遊具、園路、植栽工事。令和8年度完成目指す。町民から公園名募集予定。",
+    e: "新しい公園「あさひ未来パーク」は2026年度完成。みんなで名前も募集！" },
+  { s: "r7-3", c: "tourism", sp: "加藤好進 議員（グループ22）", an: "商工観光課長",
+    t: "ヒスイテラスにカフェ開店？",
+    q: "ヒスイテラスの施設テナント募集の結果は？",
+    a: "町内で水耕栽培事業を行うPBS株式会社が出店。「今日もかえりたい。Melon et Cafe」として自社栽培メロンパフェやドリンクを提供。",
+    e: "観光施設「ヒスイテラス」に町内産メロンのパフェを楽しめるカフェがオープン！" },
+  { s: "r7-3", c: "medical", sp: "由井崇 議員（青雲）", an: "健康課長",
+    t: "「わたしのライフプラン事業」って何？",
+    q: "新規事業の具体的内容は？",
+    a: "弁護士による成年後見制度や相続・遺言の講義、家じまい・墓じまい・税の相続説明、エンディングノート配布。元気な頃から人生のしまい方を考える機会に。",
+    e: "「人生の最期まで安心して暮らす」ための講座。弁護士さんと相続や墓じまいを学べます。" },
+
+  // ========== 令和7年6月定例会 ==========
+  { s: "r7-6", c: "medical", sp: "石原孝之 議員（グループ22）", an: "町長",
+    t: "あさひ総合病院、患者情報が紛失！",
+    q: "医師が個人情報を無断で持ち出した経緯と概要は？",
+    a: "形成外科の非常勤医師が患者577名分のSDカード（氏名・生年月日・処置画像）を富山大学附属病院内で紛失。SDカードはパスワード暗号化なし。病院所有の外付けHDDも自宅に持ち出していたことが判明。",
+    e: "あさひ総合病院で577人分の患者情報が入ったSDカードが紛失。今のところ悪用は確認されていません。" },
+  { s: "r7-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "町の特産品、メロン・レタスを名物に？",
+    q: "PBS株式会社のメロン・レタスの特産化・ブランド化は？",
+    a: "ビタミン2倍以上の高機能レタス、糖度の高いメロンを生産。ヒスイテラスのカフェオープン。ふるさと納税出品など協力したい。",
+    e: "町内で育てる特別なメロンとレタスを朝日町ブランドに。ふるさと納税の返礼品にも。" },
+  { s: "r7-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "農林水産課長",
+    t: "がごめ昆布、52kg収穫成功！",
+    q: "「がごめ昆布」の養殖試験の結果は？",
+    a: "1.5m長まで成長、総重量52kgを収穫。41.5kgが民間会社へ納品済。区画漁業権の認可待ち。",
+    e: "朝日町沖で初めて52kgも昆布が採れました！本格的な養殖業がスタートします。" },
+  { s: "r7-6", c: "env", sp: "大井光男 議員（一歩会）", an: "みんなで未来！課長 / 副町長",
+    t: "下澤産業跡地、太陽光発電に？",
+    q: "下澤産業跡地利用の地元説明会の内容、ウォーキングフィールド等にする考えは？",
+    a: "町有地賃借で民間事業者が太陽光発電設備を整備する提案。町は再生エネルギー推進と脱炭素実現の観点から進める方針。公募型プロポーザル実施へ。",
+    e: "汚染土壌のある町有地を業者に貸して太陽光発電設備を作ります。賃貸料収入と税収が町に入ります。" },
+  { s: "r7-6", c: "council", sp: "由井崇 議員（青雲）", an: "町長",
+    t: "町の情報管理、大丈夫？",
+    q: "個人情報・データ管理、漏えい対策、職員研修は？",
+    a: "朝日町情報セキュリティポリシーで遵守基準・対策基準・組織体制を規定。今回の患者情報紛失を受け、情報セキュリティ研修会を開催し万全な体制構築。",
+    e: "病院の情報紛失を受け、町全体の情報管理を見直して職員研修を強化します。" },
+  { s: "r7-6", c: "disaster", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "災害情報、スマートスピーカーで配信できない？",
+    q: "防災行政無線のシステムからスマートスピーカーに災害情報を配信できないか？",
+    a: "外国人、メール・アプリ利用困難な方、視聴覚障害者への対応も含め、スマートスピーカーへの配信も含めた効果的な情報伝達手法を研究する。",
+    e: "アレクサなどに災害情報を流せないか検討中。すべての町民に情報を届けるため。" },
+  { s: "r7-6", c: "disaster", sp: "寺西泉 議員（青雲）", an: "教育委員会事務局長",
+    t: "学校の落雷対策は？",
+    q: "奈良市の落雷事故を受け、町の対応は？",
+    a: "気象庁ウェブサイトで雷情報を確認、活動中止や避難の体制を整備。雷探知機の配置に向け準備を進めている。",
+    e: "学校での落雷事故を防ぐため、雷探知機を導入する準備中です。" },
+  { s: "r7-6", c: "council", sp: "清水眞人 議員（一歩会）", an: "総務政策課長",
+    t: "町内会のなり手不足、どうする？",
+    q: "町内会役員不足の現状と支援策は？",
+    a: "町内会の自助・共助が重要。「自分自身、地域一丸となって守り築く」を基本に、住民と検討する。",
+    e: "町内会役員のなり手不足は深刻。「自分たちの地域は自分たちで」を基本に町も支援。" },
+  { s: "r7-6", c: "child", sp: "善田奈緒 議員（未来）", an: "財政管理課長",
+    t: "中高生の居場所が町にない！",
+    q: "中高生が気軽に過ごせる場が少ない。既存施設活用の検討状況は？",
+    a: "既存施設の価値向上と地域への愛着を育む観点から、公共施設のあり方検討委員会で議論する。",
+    e: "中高生が放課後に集まれる場所が町に少ない問題。今後の公共施設見直しの中で考えます。" },
+  { s: "r7-6", c: "medical", sp: "加藤好進 議員（グループ22）", an: "健康課長",
+    t: "RSウイルスワクチン、妊婦への助成を",
+    q: "RSウイルス母子免疫ワクチン接種費用2〜3万円の助成は？",
+    a: "町としては助成は行わず、厚生労働省や県内自治体の検討状況を注視しながら、引き続き予防等の情報発信に努める。",
+    e: "妊婦向けRSウイルスワクチンの自己負担2〜3万円。町独自の補助はせず、国の動向待ち。" },
+  { s: "r7-6", c: "budget", sp: "吉江昌宏 議員（グループ22）", an: "税務課長",
+    t: "空き家を解体すると固定資産税6倍は本当？",
+    q: "空き家を解体した土地に固定資産税の軽減措置を導入できないか？",
+    a: "住宅を取り壊しても税額は6倍ではなく最大で4.2倍。「6倍」のイメージだけが先行している現状があり、正しい情報を広報していく。",
+    e: "「家を壊すと固定資産税6倍」は実は誤解で、実際は4.2倍。正しい情報を周知します。" },
+
+  // ========== 令和7年9月定例会 ==========
+  { s: "r7-9", c: "child", sp: "善田奈緒 議員（未来）", an: "教育委員会事務局長",
+    t: "中学校の部活が地域クラブになると送り迎えは？",
+    q: "部活の地域展開で活動時間が夜間に移行する。新たに生じる子どもの移動課題をどう解決？",
+    a: "「地域全体で支える」考えのもと、ご家庭の理解と協力をいただきたい。送迎は家庭にお願いする方針。",
+    e: "中学校の部活が地域のクラブに変わります。送り迎えは「家族でお願いします」が基本方針。" },
+  { s: "r7-9", c: "budget", sp: "清水眞人 議員（一歩会）", an: "財政管理課長",
+    t: "町のお財布、苦しくなってきた？",
+    q: "令和6年度決算の経常収支比率は？",
+    a: "経常収支比率93.8%（前年度比2.7ポイント上昇）。給料30万円のうち27万円が固定費というイメージ。施設の統廃合や事業のスクラップ&ビルドで健全運営。",
+    e: "町の自由に使えるお金の割合が減少中。給料の9割が必ず使うお金で1割しか自由がない状態。" },
+  { s: "r7-9", c: "budget", sp: "寺西泉 議員（青雲）", an: "町長",
+    t: "町が「稼ぐ」って、どういうこと？",
+    q: "人口減少で税収減が予想される中、自治体として「稼ぐ力」が必要では？",
+    a: "ふるさと納税などの応援制度を最大限活用し、第6次総合計画で自然環境や景観、地域資源をフル活用した「稼ぐ力」を生み出す施策を創出したい。",
+    e: "国からのお金が減るので、町自身がふるさと納税や観光で「稼ぐ」仕組みを作ろうという方針。" },
+  { s: "r7-9", c: "tourism", sp: "加藤好進 議員（グループ22）", an: "みんなで未来！課長",
+    t: "「まちづくり会社」って何のため？",
+    q: "国の交付金で進める「まちづくり会社」の進捗は？",
+    a: "官・民・地域共創を基本に住民参画でつくる会社と、民間主導で稼ぐ力を持つ会社、両輪が必要。令和8年度末の設立がよりよい選択と結論。",
+    e: "町・民間・住民が一緒に「稼げる事業」をする会社を作ります。2026年度末に設立予定。" },
+  { s: "r7-9", c: "env", sp: "西岡良則 議員（未来）", an: "みんなで未来！課長",
+    t: "太陽光パネル、業者はどう選んだ？",
+    q: "プロポーザル審査結果と、地元説明会での意見は？",
+    a: "1社のみ応募で、東京のエネグローバル株式会社が優先交渉権者に。10月上旬に全町民対象の説明会を実施。最終判断は住民意見と議会協議の中で決定。",
+    e: "太陽光パネル業者の募集に東京の1社だけ応募。地元では心配の声もあり、全町民説明会を開催。" },
+  { s: "r7-9", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "ヒスイテラスにどれだけ人が来た？",
+    q: "ヒスイテラスへの来場者数は？",
+    a: "平成30年10月オープン以来、累計38万5,859人。今年4〜8月で5万373人と大幅増。年間7万人超の見込み。",
+    e: "観光交流施設「ヒスイテラス」が大人気！2025年は年間7万人を超える見込み。" },
+  { s: "r7-9", c: "child", sp: "石原孝之 議員（グループ22）", an: "教育委員会事務局長",
+    t: "学校のプール、維持費はどれくらい？",
+    q: "小学校プールの年間維持管理費は？",
+    a: "令和6年度実績はさみさと小・あさひ野小合計で年間約106万円。らくち〜のプールを水泳授業のみ利用すると年間約90万円見込み。",
+    e: "学校プールの維持は年間100万円以上。民間プールを借りた方が安いかも検討中。" },
+  { s: "r7-9", c: "child", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "保育園、暑さ対策は大丈夫？",
+    q: "猛暑の中、保育園の環境整備や運用改善は？",
+    a: "保育所の遊戯室は暖房のみで冷房なし。警戒アラート時は外遊び中止。今後、各保育所の遊戯室への冷房設置を検討したい。",
+    e: "保育園の遊戯室にエアコンがなく暑い。今後設置を検討中。（→ 令和8年予算で実際に設置決定!）" },
+  { s: "r7-9", c: "disaster", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "避難所でマイナンバーカードが使える？",
+    q: "災害時の避難所受付でLoCoPiあさひまちの活用は？",
+    a: "マイナンバーカードで受付すれば名簿記入不要。アレルギーや持病情報を事前登録でき、避難所での生活リスク軽減に。家族への避難通知も可能。",
+    e: "災害時に避難所でマイナンバーカードを「ピッ」と。持病情報も伝わり、家族にも通知が届きます。" },
+
+  // ========== 令和7年12月定例会 ==========
+  // --- 代表質問（12/11 第2号）---
+  // 大井光男（一歩会）件名1〜3
+  { s: "r7-12", c: "env", sp: "大井光男 議員（一歩会）代表質問", an: "町長 / みんなで未来！課長",
+    t: "風力発電と太陽光パネルの計画、今どこまで進んでいる？",
+    q: "あさひ風力発電の進捗と騒音・低周波音リスクへの対応は？旧下澤産業跡地の太陽光パネル計画、地元3町内会への説明内容と事業の賛否決定時期は？",
+    a: "あさひ風力発電については事業者と協議を継続中。旧下澤産業跡地の太陽光については近隣町内会への説明（清水町・東草野・中草野）を進めており、令和8年度中の事業開始を目指していると説明。借地料は「平米85円以上」から変動なし。",
+    e: "町内の風力発電と太陽光発電の計画がどう進んでいるかを代表質問で確認した。" },
+  { s: "r7-12", c: "env", sp: "大井光男 議員（一歩会）代表質問", an: "農林水産課長",
+    t: "クマやイノシシの農作物被害、捕獲の仕組みや補助金は十分か？",
+    q: "クマやイノシシなどの捕獲数と農作物被害の現状は？ハンターの人数と各鳥獣への報酬金額は？報酬を増やす検討はしている？",
+    a: "農林水産課長は捕獲数・被害状況を報告し、個体数把握に向けた調査を継続していると説明。ハンターの確保と処遇改善が今後の課題として挙げられた。報酬金の増額については協議会での検討を継続する方針を示した。",
+    e: "クマやイノシシによる農作物被害が続いており、捕獲の仕組みや財政支援が十分かどうかを確認した。" },
+  { s: "r7-12", c: "infra", sp: "大井光男 議員（一歩会）代表質問", an: "みんなで未来！課長",
+    t: "夜の乗合タクシー「夜ノッカル」、試験運行はうまくいっている？",
+    q: "夜間のタクシーが少なくなっている影響は？「夜ノッカル」の運行曜日・時間・料金・ドライバー体制の詳細は？",
+    a: "みんなで未来！課長は「夜ノッカルは令和7年12月12日から令和8年2月1日まで、金・土・日の午後7時〜11時に運行。2名乗車で1,000円、3名で1,500円の料金設定。飲食後の帰宅ニーズを中心に活用されており、タクシーの夜間補完として有効と認識している」と答弁した。",
+    e: "夜遅くのタクシーが少ない地域で、乗合移動サービス「夜ノッカル」を試験運行。金・土・日の夜7〜11時、2人で1,000円から利用できる。" },
+  // 由井崇（青雲）件名1〜4
+  { s: "r7-12", c: "medical", sp: "由井崇 議員（青雲）代表質問", an: "町長 / あさひ総合病院事務部長",
+    t: "あさひ総合病院の赤字経営、どう立て直す？医師・看護師の確保は？",
+    q: "物価高騰・給与費増加で経営悪化が続く病院、立て直しの方針は？医師・看護師の確保策は？黒部市民病院との機能分担も検討している？",
+    a: "病床利用率を85%から90%以上に引き上げることを目標に、新川医療圏の黒部市民病院・富山労災病院との連携を強化。病院完結型から地域完結型医療へ転換することで経営改善を図る方針。医師確保は継続的な課題として認識していると答弁。",
+    e: "町立病院の経営が苦しいので、近くの黒部の病院と役割分担しながら経営を立て直す計画を確認した。" },
+  { s: "r7-12", c: "infra", sp: "由井崇 議員（青雲）代表質問", an: "住民・子ども課長 / 各担当課長",
+    t: "増える空き家・土地の境界・成年後見制度、町の取り組みは？",
+    q: "752戸に増えた空き家の発生を防ぎ、活用につなげる方針は？能登の地震を教訓に地籍調査は進める？認知症の方を守る成年後見制度の利用促進はどう進める？",
+    a: "空き家バンクの活用・除却補助等で対応を継続。定住サポート事業実績は新築10件・中古9件。地籍調査は費用対効果を見ながら検討中。成年後見は相談窓口の充実と市民後見人の養成を進めると答弁。",
+    e: "増えている空き家の対策、土地の境界を明確にする地籍調査、認知症などで判断力が低下した方を守る成年後見制度について町の取り組みを確認した。" },
+  // 吉江昌宏（グループ22）件名1〜4
+  { s: "r7-12", c: "child", sp: "吉江昌宏 議員（グループ22）代表質問", an: "教育長",
+    t: "部活動の地域クラブ化、費用は誰が負担する？国への支援要請は？",
+    q: "部活動の地域クラブ化で「一番のネックは予算」とのこと、国にどんな支援を求めている？費用は利用者と公費でどう分担する？経済的に苦しい家庭の子どもはどう守る？",
+    a: "教育長は「一番のネックは予算」として国への財政支援要求の必要性を認識。令和8年度以降も実行委員会を継続し、課題を横断的に共有しながら「地域の子どもは地域で育てる」体制を構築する。子どもの未来創造こども議会での提言にも応えていく方針を答弁した。",
+    e: "中学校の部活動を地域クラブへ移行するにあたり、国への財政支援と費用の負担の仕組みをどうするかを代表質問で追及した。" },
+  { s: "r7-12", c: "infra", sp: "吉江昌宏 議員（グループ22）代表質問", an: "建設課長",
+    t: "県道入善朝日線の拡幅工事、次の区間はいつ完成する？",
+    q: "全体2040mの拡幅計画で、354mが完成済み。工事中の116m区間はいつ完成する？残りの区間は県にどう要望していく？",
+    a: "建設課長は「計画区間全体は約2040m。354m区間が完成済みで、次の116m区間を令和10年度完成を目標に工事中。残りの区間は引き続き県と協議・要望していく」と答弁。住民説明については丁寧に進める方針を示した。",
+    e: "朝日町内の県道の拡幅工事は全部で2040mの計画。354mが完成し、次の116mを令和10年度完成目標で工事中。残りは今後も県に要望していく。" },
+  { s: "r7-12", c: "infra", sp: "吉江昌宏 議員（グループ22）代表質問", an: "町長",
+    t: "泊高校の跡地、工場だけでなくレジャー施設の誘致も考えてみては？",
+    q: "近くの企業は人手不足で工場誘致はうまくいかないかもしれない。工場にこだわらず、アミューズメントやレジャー施設の誘致も検討できないか？",
+    a: "町長は「娯楽施設やアミューズメント施設も企業誘致の一形態として捉えられる。企業誘致に限定せず幅広く検討する」として多様な活用を検討する方針を示した。住民説明については丁寧に進める姿勢を示した。",
+    e: "泊高校の跡地活用について「工場だけじゃなくてレジャー施設でもよいのでは」という提案を質問。町長も「幅広く検討する」と答えた。" },
+  { s: "r7-12", c: "tourism", sp: "吉江昌宏 議員（グループ22）代表質問", an: "みんなで未来！課長",
+    t: "東草野の湧き水、観光や教育のために水くみ場として整備できないか？",
+    q: "東草野の湧き水を整備して誰でも水をくめる場所にできないか？蛇口や水受け台を設置し、水質検査結果も公開して観光や教育にも活かしたい。",
+    a: "みんなで未来！課長は「関係部署と協議して検討する」と答弁。補助金の活用可能性についても情報収集を進めると説明した。",
+    e: "東草野地区の自然の湧き水をお水くみ場として整備し、観光や教育に活かしてほしいという提案を代表質問で行った。" },
+  // 西岡良則（未来）件名1 要旨1〜2
+  { s: "r7-12", c: "council", sp: "西岡良則 議員（未来）代表質問", an: "町長",
+    t: "来年5月の町長選挙、4期目も立候補する？",
+    q: "11年半の町政運営の自己評価は？来年5月の町長選挙に4期目も出馬する？",
+    a: "町長は「就任以来、自ら考え、行動し、結果を出すという視点で取り組んできた。再度町民の審判を仰ぎ、町政運営に邁進したい」と出馬を表明した。",
+    e: "「来年の町長選挙に再び立候補します」と表明。やり残したことが多いのでもう一期務めたい意向。" },
+  { s: "r7-12", c: "council", sp: "西岡良則 議員（未来）代表質問", an: "町長",
+    t: "消防団員の成り手不足、定年を延ばして対応できないか？",
+    q: "消防団員の成り手不足が深刻になっている。経験豊富な高齢団員に長く活躍してもらうために定年を延ばせないか？",
+    a: "町長は「消防団員の確保は重要な課題。定年延長については消防団の実情や全国的な動向を踏まえながら検討する」と答弁した。",
+    e: "消防団員のなり手不足を補うため、定年を延ばして経験豊富な団員に長く活躍してもらう案を質問した。" },
+
+  // --- 一般質問（12/12 第3号）---
+  // 寺西泉（青雲）件名1〜2
+  { s: "r7-12", c: "infra", sp: "寺西泉 議員（青雲）一般質問", an: "建設課長 / 健康課付課長",
+    t: "人口が減ると水道組合や除雪の維持が難しくなる、どう対応する？",
+    q: "人口が減って水道組合の維持が難しくなる前に、中長期的な対策は？除雪機械の貸出や補助をもっと充実できる？ライフプラン講座も全地区でやってほしい。",
+    a: "水道組合は「各組合で使用料値上げや費用積立てを検討いただきたい」と情報提供・助言による支援方針。共助除雪は地域ぐるみ除排雪促進事業補助金の拡充を来年度以降検討。ライフプラン事業は3年計画で全地区巡回予定（今年度3地区63名参加）と答弁。",
+    e: "住民が減ると水道組合や除雪の維持が大変になる。町は料金値上げ・費用積立を促しながら支援し、相続や墓じまいを考える講座も全地区で開いていく。" },
+  { s: "r7-12", c: "budget", sp: "寺西泉 議員（青雲）一般質問", an: "商工観光課長 / みんなで未来！課長",
+    t: "ふるさと納税をもっと増やせないか？返礼品・太陽光・広告収入の可能性は？",
+    q: "ふるさと納税を増やすために返礼品や受付サイトをもっと充実できる？小丸山グラウンドなど町有地に太陽光発電を設置して収入にできないか？広告収入を取る取り組みは？",
+    a: "商工観光課長は「返礼品拡充・新規ポータルサイト契約・魅力発信強化、まちづくり会社での位置づけも検討」と答弁。町有地太陽光は「丁寧な説明を続け粛々と推進」、広告収入は「商工会との相談を検討」と前向きな姿勢を示した。",
+    e: "「ふるさと納税を増やしたい」「太陽光発電で収入を」「広告料を取ってはどうか」と町の稼ぐ力を高める提案が相次いだ。" },
+  // 加藤好進（グループ22）件名1〜3
+  { s: "r7-12", c: ["budget", "env"], sp: "加藤好進 議員（グループ22）一般質問", an: "財政管理課長 / みんなで未来！課長 / 農林水産課長",
+    t: "来年度の予算方針・地域おこし協力隊の活用・熊ハンターの報酬改善はどうなる？",
+    q: "来年度の予算編成、何を優先する方針？地域おこし協力隊のインターン活用やまちづくり会社での募集を考えている？熊ハンターの報酬が県内でバラバラな状況、改善する？",
+    a: "①財政管理課長「スクラップ・アンド・ビルド徹底、財源確保、第6次総合計画推進が基本方針」②みんなで未来！課長「まちづくり会社設立に向け協力隊募集も検討。農業分野で4泊5日の就農体験を実施中」③農林水産課長「協議会で待遇改善を検討中。緊急銃猟マニュアルは作成済みで訓練実施予定」と答弁。",
+    e: "「来年の予算は何を優先？」「地域おこし協力隊をもっと活用できないか？」「クマ対策のハンターさんの報酬は県内でバラバラ、改善を」の3点を一般質問した。" },
+  { s: "r7-12", c: "tourism", sp: "加藤好進 議員（グループ22）一般質問", an: "商工観光課長 / 建設課長",
+    t: "「春の四重奏」の大混雑、2026年から有料予約制にして解消できる？",
+    q: "「春の四重奏」の駐車場を2026年から有料予約制にする計画の詳細は？今年の山岳観光の除雪が例年の倍かかった原因と来年の対策は？",
+    a: "商工観光課長は「駐車場の事前予約システムを導入予定。観光バスは1万円、一般車は1,500円（町民は無料）とする方向で検討中」と答弁。建設課長は「今年は例年の2倍の4週間かかった。来年は業者から聞取り調査で課題把握予定」と答弁。",
+    e: "桜の名所「春の四重奏」の大混雑対策として、2026年から駐車場をネット予約制・有料（観光バス1万円、一般車1,500円）に変更。町民は無料。" },
+  { s: "r7-12", c: "medical", sp: "加藤好進 議員（グループ22）一般質問", an: "健康課長",
+    t: "赤ちゃんを守るRSウイルスワクチン、来年4月の定期接種化に向けた準備は？",
+    q: "2026年4月から定期接種になるRSウイルスワクチン、対象となる赤ちゃんは何人いる？どんな準備をしている？",
+    a: "健康課長は「令和8年度の対象者は25名を見込んでいる。母子健康手帳交付時に説明し、予診票を交付する体制を整える」と答弁した。",
+    e: "赤ちゃんを守るRSウイルスワクチンが2026年4月に定期接種になる。対象は約25名の見込みで、お母さん向けに母子手帳交付時に案内する予定。" },
+  // 清水眞人（一歩会）件名1〜3
+  { s: "r7-12", c: "env", sp: "清水眞人 議員（一歩会）一般質問", an: "みんなで未来！課長",
+    t: "旧下澤産業跡地への太陽光パネル設置、地元の反応と問題が起きたときの責任は？",
+    q: "清水町・東草野・中草野の説明会で出た住民の声と反応は？メガソーラーを設置して後で問題が起きたとき、町は責任を持って対応してくれる？",
+    a: "みんなで未来！課長は「3町内で計49名参加（中草野15名・東草野16名・清水町18名）。パネルの視認性・除草方法・倒産時対応等の懸念が確認された。清水町内会はアンケートで反対意見が多かった」と説明。「賃貸借契約に必要な対策を明記し、問題発生時は住民に寄り添って対応する」と答弁。",
+    e: "「太陽光パネルの計画について地元説明会をしたが清水町内会は反対意見が多い。何か問題が起きたら誰が責任をとるのか？」→町は「町が責任を持って対応する」と約束。" },
+  { s: "r7-12", c: "infra", sp: "清水眞人 議員（一歩会）一般質問", an: "総務政策課長 / 農林水産課長 / 建設課長",
+    t: "住民の声を受けて、委任業務の見直し・電気柵の管理・水道組合の存続はどうする？",
+    q: "町内会が担う委任業務（交通安全指導など）を見直して負担を減らせないか？電気柵（全体約25.7km）の高齢化で維持が難しくなる地区への支援は？簡易水道組合の課題に行政はどう関わる？",
+    a: "①総務政策課長「黒東交通安全協会が地域実情に応じた無理のない実施を呼びかけ中」②農林水産課長「シルバー人材センター委託など各地区で工夫。協力金集約と町からの交付で支援継続」③建設課長「定期アンケートで状況把握し、使用料値上げや積立てを促進。補助金で支援継続」と答弁。",
+    e: "住民が「議員と語ろう」で伝えた声を代表して、①町内会の仕事の見直し②電気柵の管理③水道組合の存続という3点を一般質問した。" },
+  { s: "r7-12", c: "medical", sp: "清水眞人 議員（一歩会）一般質問", an: "健康課付課長",
+    t: "終活を考える「ライフプラン事業」は全地区で開ける？一人暮らし高齢者の雪かき支援は大雪でも対応できる？",
+    q: "相続や墓じまいを一緒に考える「ライフプラン事業」、全地区で開催できる？一人暮らし高齢者への雪かき支援は大雪になっても対応できる体制になっている？",
+    a: "健康課付課長は①「3年計画で全地区を巡回予定。弁護士による講義内容を1月号広報に掲載予定」②「建設業協会加入業者13社に加え農事組合法人など3法人を登録し、大雪時対応を強化している」と答弁した。",
+    e: "①「終活」の準備を考える講座を全地区で開催する計画②一人暮らし高齢者の雪かき支援（非課税世帯は無料・年2回まで）の大雪時の対応体制を確認した。" },
+  // 善田奈緒（未来）件名1〜3
+  { s: "r7-12", c: "child", sp: "善田奈緒 議員（未来）一般質問", an: "教育委員会事務局長 / 商工観光課長 / 住民・子ども課長",
+    t: "部活動が地域クラブに移行する4月、子どもの送り迎えや放課後の居場所はどうする？",
+    q: "令和8年4月に部活が地域クラブに完全移行するが、実行委員会の体制は続く？授業が終わってクラブが始まるまでの空き時間、子どもの送り迎えや居場所はどう確保する？",
+    a: "教育委員会事務局長は「実行委員会は教育委員会に事務局を設置し、令和8年4月以降も継続。スクールバス18時便を継続し個々の事情で家庭送迎にも対応」と説明。公共交通担当は「子どものニーズをダイヤ改正時に検討」、子ども課は「既存施設を活用し居場所環境づくりを推進」と答弁。",
+    e: "学校の部活を地域クラブに完全移行する令和8年4月に向けて、「子どもの送り迎えや活動後の居場所はどうするの？」という疑問を質問した。" },
+  { s: "r7-12", c: "council", sp: "善田奈緒 議員（未来）一般質問", an: "みんなで未来！課長",
+    t: "町出身者を地域活動の担い手として関わってもらう仕組みを作れないか？",
+    q: "町出身者に観光客としてだけでなく、祭りや地域行事の担い手として関わってもらう仕組みを作れないか？飛騨市「ヒダスケ！」のような具体的な役割メニューを整備する考えは？",
+    a: "みんなで未来！課長は「飛騨市の『ヒダスケ！』など先進事例を参考に、朝日町に合った担い手制度の創出と役割の明確化を検討する。国のふるさと住民登録制度の動向も踏まえながら、全庁的に協議していく」と答弁した。",
+    e: "「朝日町出身者に観光客としてだけでなく、地域行事の担い手として関わってもらう仕組みを作れないか」という提案を一般質問した。" },
+  { s: "r7-12", c: "budget", sp: "善田奈緒 議員（未来）一般質問", an: "みんなで未来！課長",
+    t: "あさひまちコインのお得チャージは公平なの？今後の活用方針は？",
+    q: "あさひまちコインのプレミアムチャージ（お得チャージ）と施策への活用では財源や公平性の考え方が違う？今後の活用方針はどう考えている？",
+    a: "みんなで未来！課長は「プレミアムは事業者支援・消費活性化が目的で、施策活用とは別物。『おみせで交換キャンペーン』（11店舗参加、11月28日〜12月23日）で加盟店主体の施策へ転換を推進している」と答弁。",
+    e: "「あさひまちコイン（LoCoPi）」のお得チャージは公平なのか？という疑問に、町は「加盟店で使える仕組みをさらに広げていく」と答えた。" },
+
+  // --- 議案質疑 ---
+  { s: "r7-12", c: "infra", sp: "加藤好進 議員（質疑）", an: "建設課長",
+    t: "泊高校跡地へつながる新しい町道（議案69号）、距離と完成時期は？",
+    q: "泊高校跡地へのアクセス道路（議案69号）の延長は何メートル？完成時期の見通しは？",
+    a: "建設課長は「延長約280メートル、幅員11.5メートル予定。県による泊高校跡地造成工事が先行し、測量開始は令和8年度予定。完成時期は未定」と答弁。全員賛成で可決。",
+    e: "泊高校跡地へつながる新しい町道（約280m）の認定を議会で可決。完成時期はまだ未定。" },
+  { s: "r7-12", c: "child", sp: "西岡良則 議員（質疑）", an: "住民・子ども課長",
+    t: "物価高対応の子育て応援手当（議案71号）、何人が対象でいつ支給される？",
+    q: "物価高対応の子育て応援手当（議案71号）の支給対象は何人で、いつから支給される？",
+    a: "住民・子ども課長は「支給対象者は980人を見込んでいる。支給時期は令和8年2月から開始予定」と答弁。全員賛成で可決。",
+    e: "物価高に苦しむ子育て家庭への手当支給を盛り込んだ補正予算を可決。対象は980人で、令和8年2月から支給開始予定。" },
+  // ========== 令和8年1月臨時会・3月定例会 ==========
+  // ===== 令和8年1月臨時会 =====
+  { s: "r8-1ri", c: "budget", sp: "大井光男 議員（質疑）", an: "担当課長",
+    t: "コインプレミアムの補正予算、登録しない町民は対象外？（議案73号）",
+    q: "令和7年度一般会計補正予算（第10号）1億6,769万円（コインプレミアムチャージ8,480万円・子育て応援手当6,495万円・消雪装置修繕1,046万円）を審議。大井光男議員は「LoCoPiあさひまちの登録者は12月末現在3,239名・チャージ履歴者1,424名とのことだが、登録しない町民と登録した町民を差別することになる。全町民に平等に支給すべきでは」と主張。独り暮らし高齢者や入院患者などチャージできない住民への対応も質問した。",
+    a: "担当課長は「サービス利用には登録手続が必要。国の支援に加え町単独で上乗せしたもの」と説明。高齢者等には「同居家族による代理申請が可能」と回答。全員賛成で原案可決。",
+    e: "あさひまちコインのアプリに登録した人だけが対象なのは不公平では？という質問に、町は「アプリを使うには登録が必要で、家族が代わりに手続きできる」と説明した。" },
+  { s: "r8-1ri", c: ["budget", "child"], sp: "善田奈緒 議員（質疑）", an: "担当課長",
+    t: "コインプレミアムと子育て手当、多子世帯の上限5万円はどう調整？（議案73号）",
+    q: "令和7年度一般会計補正予算（第10号）審議にて、善田奈緒議員はコインプレミアムチャージ事業と子育て応援手当支給事業が同じチャージ上限（5万円）の枠内で競合しないか確認。特に子どもが多い多子世帯で上限に達した場合の対応を質問した。",
+    a: "担当課長は「上限に達した場合、配偶者名義で支給するなど柔軟に対応する」と答弁。全員賛成で原案可決。",
+    e: "コインのお得チャージと子育て手当が同じ5万円の枠を共有するため、子どもが多い家庭では足りなくなることを指摘。町は「配偶者の名義で対応する」と説明した。" },
+  { s: "r8-1ri", c: "medical", sp: "町長（提案）", an: "全員賛成で可決",
+    t: "あさひ総合病院の光熱費・食材料費高騰分を補正（議案74号）",
+    q: "令和7年度朝日町病院事業会計補正予算（第4号）401万円を審議。光熱費・食材料費の高騰に対応するための病院事業会計への追加措置。",
+    a: "特に質疑なく、全員賛成で原案可決。物価高騰によるあさひ総合病院の運営コスト増加分を補填。",
+    e: "電気代や食材の値上がりで病院の経営が苦しくなっているため、約401万円を追加で補填する予算を全会一致で可決した。" },
+  { s: "r8-1ri", c: "infra", sp: "西岡良則 議員（質疑）", an: "建設課長",
+    t: "除雪費が足りず専決処分6,500万円、消雪装置の修繕箇所は？（議案75号・専決第11号）",
+    q: "令和7年度一般会計補正予算（第9号）6,500万円の専決処分（補正第9号）承認を審議。大雪による除雪費の不足分を緊急補填するため、町長が議会を開かず専決処分した。西岡良則議員は補正に含まれる消雪装置修繕700万円について「場所と修繕内容の詳細を教えてほしい」と質問。",
+    a: "建設課長は「既に故障箇所への対応を実施済みで予算不足が生じており、今後の不具合にも対応するための予算」と説明。具体的な場所・内容は明示されなかった。全員賛成で原案承認。",
+    e: "今シーズンの大雪で除雪にかかるお金が予算を超えてしまったため、町長が急いで6,500万円を追加する決定（専決処分）をした。そのあと議会に報告して全会一致で承認した。消雪装置の修繕700万円についての質問もあったが、詳細は示されなかった。" },
+
+  // ===== 令和8年3月定例会 =====
+  { s: "r8-3", c: "budget", sp: "寺西泉 議員（青雲）", an: "町長",
+    t: "令和8年度の予算編成の考え方は？",
+    q: "予算編成における町長の熱い思いを聞かせてほしい。",
+    a: "「夢と希望があふれるまち朝日町」の実現に向け、持続可能なまちづくりを進める。事業の選択と集中を徹底し、職員一人ひとりの発想転換で見直した結果「朝日町の未来を見据えた予算」となった。",
+    e: "「お金が限られている中、何にいくら使うか厳しく見直して、未来につながる事業に重点配分」。" },
+  { s: "r8-3", c: "child", sp: "石原孝之 議員（グループ22）", an: "町長",
+    t: "子育てステージアップ応援事業とは？",
+    q: "新しい段階支援の事業概要は？",
+    a: "従来の誕生祝金を半額にし、小学校入学時に2万円、中学校入学時に3万円を支給。高校入学時の5万円と合わせ、成長段階ごとにきめ細かく支援。あさひ商品券またはLoCoPiコインで支給。",
+    e: "誕生祝い金を半分にして、小・中・高の入学時にお祝い金を出すことに。" },
+  { s: "r8-3", c: "child", sp: "善田奈緒 議員（未来）", an: "みんなで未来！課長",
+    t: "町外の子どもとの交流事業の展望は？",
+    q: "「みんまなびCamp」など域外の子どもとの自然体験交流事業をどう展開？",
+    a: "リアルな体験活動による非認知能力の育成が重要。デジタルとのハイブリッドな取り組みを推進。子どもたちの交流の場の創出に取り組んでいきたい。",
+    e: "タブレットだけでなく、町外の子どもと自然体験する取り組みを大事にしていく方針。" },
+  { s: "r8-3", c: "infra", sp: "清水眞人 議員（一歩会）", an: "建設課長",
+    t: "泊駅のバリアフリー化はいつ？",
+    q: "泊駅の南北を結ぶ自由通路と、駅ホームへのエレベーター設置の整備概要は？",
+    a: "自由通路は町が、エレベーター・階段はあいの風とやま鉄道が事業主体。令和8年度から実施設計、令和10年度の工事着手を目指す。",
+    e: "泊駅に「自由通路」と「エレベーター」を作ります。設計は2026年度から、工事は2028年度から。" },
+  { s: "r8-3", c: "infra", sp: "西岡良則 議員（未来）", an: "建設課長",
+    t: "あさひ未来パークはいつ開園？",
+    q: "あさひ未来パークの部分開園時期や運営は？",
+    a: "公園東側の遊具広場が4月中に完成見込み、5月2日に部分開園。維持管理は町職員とシルバー人材センター、監視カメラも設置。「朝日町松倉子ども基金」を活用。",
+    e: "新公園「あさひ未来パーク（みらパー）」が2026年5月2日に部分オープン！遊具広場が使えます。" },
+  { s: "r8-3", c: "disaster", sp: "加藤好進 議員（グループ22）", an: "総務政策課長",
+    t: "犯罪被害者への支援条例を作らないの？",
+    q: "県内で4市村のみ。条例の要否は？",
+    a: "現段階では条例制定に至っていない。県内全市町村が令和7年9月に富山県犯罪被害者等支援協議会に加入。今後、条例制定を含めた支援体制を検討したい。",
+    e: "「犯罪被害者を町としてどう助けるか」のルール作りを、これから検討していくことに。" },
+  { s: "r8-3", c: "infra", sp: "由井崇 議員（青雲）", an: "健康課付課長 / 建設課長",
+    t: "井戸の改修に補助を出せない？",
+    q: "高齢者世帯等を対象とした井戸改修支援制度を検討できないか？",
+    a: "個人井戸への補助は、簡易水道施設補助金の制度を踏まえて今後研究。課をまたいで多面的に支援を検討する。",
+    e: "「井戸が壊れたら困る高齢者世帯を町で補助できないか」町は「これから検討します」と回答。" },
+  { s: "r8-3", c: "infra", sp: "吉江昌宏 議員（グループ22）", an: "建設課長",
+    t: "空き家対策のセミナーをやるの？",
+    q: "令和8年度の空き家セミナーの内容は？",
+    a: "令和7年度調査で空き家752戸（前回比91戸増）。専門家を講師に相続・登記の基本、空き家にしない留意点、利活用情報を提供。",
+    e: "町の空き家が752軒に増加！「空き家になる前に家族で話し合おう」というセミナーを2026年度に開催。" },
+  { s: "r8-3", c: "budget", sp: "大井光男 議員（一歩会）", an: "みんなで未来！課長",
+    t: "あさひまちコインのプレミアム事業は公平？",
+    q: "5万円上限・50%加算のプレミアム事業は一部の人だけが恩恵を受ける。公平性に欠けるのでは？",
+    a: "短期間で約4,000万円が利用され、物価高対策として大きな経済効果。利用できなかった方の声も頂戴。令和8年度も継続予定で実施方法を検討。",
+    e: "「LoCoPiあさひまちコイン」キャンペーンに「使えなかった人もいて不公平」と指摘。来年は方法見直し。" },
+
+  // --- R8.3 追加（議会だよりNo.129より）---
+  { s: "r8-3", c: "env", sp: "善田奈緒 議員（未来）", an: "みんなで未来！課長",
+    t: "太陽光パネル設置で景観と撤去費用は守られる？",
+    q: "町有地貸出しによる太陽光パネル設置で、将来の撤去費用や環境モニタリング費用を事業者に負担させる確約を求める。また住民が求める目隠しの樹木植栽を拒絶した見解は？",
+    a: "撤去費用等の住民要望は詳細設計で意見を取入れ、賃貸借契約に明記する。水質検査の追加分も町負担で対応し、土壌流出時は事業者と協議の上、町が責任をもって対応する。景観については荒廃した土地よりも管理の行き届いた景観に向上するという視点から提案している。契約内容は議会に伝え、必要に応じ住民にも公開していく。",
+    e: "太陽光パネルを町の土地に建てる計画に「撤去費用は？景観が壊れる」と住民から心配の声。町は「撤去費用は契約書に明記」「荒廃地より景観は改善する」と答弁。" },
+  { s: "r8-3", c: "budget", sp: "清水眞人 議員（一歩会）", an: "財政管理課長",
+    t: "公共施設を20%減らす計画の根拠は？",
+    q: "町公共施設等管理計画で建築系公共施設の延床面積を20%削減する目標とした要因は？",
+    a: "以前の「1人当たり8.8㎡維持」目標では急激な人口減少下で全施設の維持が難しくなるため計画を改訂。令和37年度末時点の延床面積を20%削減（92.42㎡）という実現性のある目標に設定した。今後、公共施設のあり方検討委員会などで具体的に検討を行う。",
+    e: "人口が速く減っているので、町の建物を2062年までに今より20%少なくする計画。どの施設をどうするかは委員会で住民と一緒に決めていく。" },
+  // ========== 追加：その他の質問・委員会レポートから ==========
+  // --- R5.3 (2023年3月) 追加 ---
+  { s: "r5-3", c: "child", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長",
+    t: "保育園での紙おむつ持ち帰りを園で処理に？",
+    q: "県内市町12カ所のうち園で処理は2カ所のみ。社会のニーズや感染症対策の観点から、園での処理にしては？",
+    a: "保護者へアンケートを実施し、結果を踏まえた上で検討したい。",
+    e: "子どもの使用済みおむつを保護者が家に持ち帰る現状。園で処理する方向で検討に。" },
+  { s: "r5-3", c: "tourism", sp: "清水眞人 議員（一歩会）", an: "町長 / みんなで未来！課長",
+    t: "若年女性の県外流出と対策は？",
+    q: "若年女性の転出者数が異常に高い。住宅取得資金助成などを手厚くするべきでは？",
+    a: "次世代を担う若年層・子育て世帯の住宅取得を支援。若年者加算・子育て加算・新婚加算の3つの加算措置を新設。",
+    e: "朝日町で家を建てる若い世代に補助金を加算する3つの新制度をスタート。" },
+  { s: "r5-3", c: "env", sp: "水野仁士 議員（青雲）", an: "農林水産課長",
+    t: "森林環境譲与税の使い道は？",
+    q: "国は森林環境譲与税の使い道が少ないと指摘。朝日町ではどう使っているか？",
+    a: "町は森林意向調査のみ。富山県全体では森林整備、人材育成、木材利用、普及啓発の4項目で活用。今後様々な施策を考えていく。",
+    e: "森林税の使い方が朝日町は意向調査だけと指摘あり。今後は森林整備にも幅広く使う方針。" },
+  { s: "r5-3", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "泊駅南分譲地、契約数は？",
+    q: "16区画販売開始から約2カ月。契約成立は何区画か？",
+    a: "新聞折り込みチラシ、不動産会社訪問など販売促進。3件の相談を受けている段階。",
+    e: "新しい泊駅南の分譲地、販売開始2カ月で3件の相談。なかなか売れていない状況。" },
+
+  // --- R5.6 (2023年6月) 追加 ---
+  { s: "r5-6", c: "infra", sp: "西岡良則 議員（未来）", an: "子ども・住民課長",
+    t: "泊駅南側に乗降口を設置できないか？",
+    q: "区画整理事業に合わせ南側乗降口の設置を進めるべきでは？",
+    a: "あいの風とやま鉄道や県に駅舎バリアフリー化を含めた利便性向上を要望中。引き続き働きかける。",
+    e: "泊駅の南側からも乗れるようにしてほしい要望。鉄道会社と継続協議中。" },
+  { s: "r5-6", c: "budget", sp: "寺西泉 議員（青雲）", an: "町長",
+    t: "持続可能なまちづくりの予算編成は？",
+    q: "選択と集中を徹底し、結果が出ていない施策は廃止・縮小すべき。",
+    a: "毎年財政シミュレーションを作成し将来を見据えている。最少経費で最大効果を上げるよう取り組む。",
+    e: "町の財政は厳しく、効果のない事業は思い切ってやめる方針。" },
+  { s: "r5-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "教育委員会事務局長",
+    t: "新美術館の展示室は何部屋？",
+    q: "3展示室の使用方法と来館者見込みは？",
+    a: "5,450人の年間来館者見込み。1展示室は有名作家、2展示室は館蔵品、3展示室は若手芸術家用。",
+    e: "新しいふるさと美術館は3部屋構成。年間5,450人の来館を見込みます。" },
+  { s: "r5-6", c: "tourism", sp: "石原孝之 議員（グループ22）", an: "商工観光課長",
+    t: "コロナ後の朝日町、未来ビジョンは？",
+    q: "コロナで失われた活気を取り戻すために、消費を促す未来ビジョンをどう描いているのか？",
+    a: "「乾杯応援キャンペーン」など独自施策で景気の下支え。「夢と希望が持てるまちづくり」に向けオール朝日町で取り組む。",
+    e: "コロナで冷え込んだ朝日町を、独自キャンペーンと官民連携で元気にしていきます。" },
+
+  // --- R5.9 (2023年9月) 追加 ---
+  { s: "r5-9", c: "council", sp: "寺西泉 議員（青雲）", an: "町長",
+    t: "公共施設の管理計画、加速する必要は？",
+    q: "人口減少が加速する中、施設統廃合を加速的に進めるべきでは？",
+    a: "施設の老朽度や利用状況を共有・多角的に検討中。社会情勢や時期を見定めて動くべきものがある。",
+    e: "町の建物が多すぎる問題。減らす計画を早く進めるべきという指摘に、慎重姿勢の町。" },
+  { s: "r5-9", c: "budget", sp: "寺西泉 議員（青雲）", an: "教育委員会事務局長",
+    t: "サンリーナ大規模改修、いつ？",
+    q: "建設から28年。重要施設の改修予定は？",
+    a: "今年度中に大規模改修基本設計を実施。屋根・外壁・天井を含む全体改修と各室配置の検討を行う。",
+    e: "町の主要体育施設「サンリーナ」が老朽化。2023年度中に改修設計、その後工事へ。" },
+  { s: "r5-9", c: "council", sp: "清水眞人 議員（一歩会）", an: "あさひ総合病院事務部長",
+    t: "あさひ総合病院の経営改善策は？",
+    q: "現状における可能な経営改善策は？",
+    a: "麻酔科の標榜による診療報酬加算、電子カルテ更新、近隣開業医への訪問など収益増・経費削減の取組を実施中。",
+    e: "町立病院の経営を立て直すため、新しい診療科を作り、近隣医院との連携を強化。" },
+  { s: "r5-9", c: "env", sp: "寺西泉 議員（青雲）", an: "みんなで未来！課長",
+    t: "富山県東部沖洋上風力発電の進捗は？",
+    q: "「有望な区域」整理への取り組みは？",
+    a: "今後の方策として、関係者特定や法定協議会設置のための同意を目指し協議・調整を進める。",
+    e: "朝日町沖の洋上風力発電事業、次のステップ「有望な区域」指定を目指して動き出しました。" },
+
+  // --- R5.12 (2023年12月) 追加 ---
+  { s: "r5-12", c: "tourism", sp: "大井光男 議員（一歩会）", an: "建設課長 / 町長",
+    t: "泊駅南分譲地、契約状況は？",
+    q: "販売開始から1年経過。組合との連携は？",
+    a: "保留地販売は組合主体。同意未取得地権者との交渉も含め進捗中。組合と私どもを信頼してほしい。",
+    e: "新しい泊駅南の分譲地販売、土地区画整理組合と協力して進めています。" },
+  { s: "r5-12", c: "child", sp: "由井崇 議員（青雲）", an: "住民・子ども課長",
+    t: "ふるさと納税の経済効果は？",
+    q: "町外からの寄附額と返礼品の経済効果は？",
+    a: "令和4年度寄附金は前年比9.7%減少。要望の多かったカニが提供できなくなったことが大きな要因。",
+    e: "ふるさと納税が前より減少。人気の返礼品（カニ）が出せなくなったのが響きました。" },
+  { s: "r5-12", c: "budget", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "町職員に地方公務員地域貢献活動休暇は導入する？",
+    q: "町職員が地域活動に参加しやすいよう休暇制度を導入できないか？",
+    a: "制度の有用性は理解しているが、業務に支障を来すおそれもあり、慎重に研究・検討を重ねる必要がある。",
+    e: "町職員が地域活動（消防団など）に参加しやすい新しい休暇制度。検討中。" },
+
+  // --- R6.3 (2024年3月) 追加 ---
+  { s: "r6-3", c: "budget", sp: "清水眞人 議員（一歩会）", an: "総務政策課長",
+    t: "松倉子ども基金とは？",
+    q: "公園や子ども関連事業に活用される基金の経緯は？",
+    a: "町内で57年小児科を開業されていた松倉利喜氏からの寄付金で創設。子どもたちの公園整備や運営に活用。",
+    e: "町の小児科の先生が寄付してくれたお金で、子どもの公園を作っています。" },
+  { s: "r6-3", c: "child", sp: "石原孝之 議員（グループ22）", an: "教育委員会事務局長",
+    t: "中学校プールはどうする？",
+    q: "中学校プール解体工事の予算計上について。",
+    a: "老朽化したプールを解体予定。今後は民間プールや小学校との連携で水泳授業を実施。",
+    e: "古くなった中学校のプールを取り壊し。今後は民間プールや小学校のものを使います。" },
+  { s: "r6-3", c: "disaster", sp: "石原孝之 議員（グループ22）", an: "総務政策課長",
+    t: "海抜表示シートを増やせない？",
+    q: "津波避難の判断材料として海抜表示シートの活用は？",
+    a: "現在主要箇所に設置。状況に応じて増設や見直しを検討。",
+    e: "津波の時にどっちに逃げるか分かる「海抜表示シート」を町内に増やす検討中。" },
+  { s: "r6-3", c: "child", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長",
+    t: "子育て支援センターの利用率は？",
+    q: "育児サロンの予約制を撤廃できないか？",
+    a: "現状はコロナ後の運営として予約制を継続。利用率や保護者の声を踏まえ検討する。",
+    e: "子育て支援センターの予約制を、もっと気軽に使えるよう見直し検討。" },
+
+  // ===== 令和6年4月臨時会 =====
+  { s: "r6-4ri", c: "budget", sp: "町長（提案）", an: "全員賛成で可決",
+    t: "DX推進事業1億812万円を含む令和6年度補正予算（第1号）を可決",
+    q: "デジタル田園都市国家構想タイプ3の国交付金を活用し、ICT教育推進のためDX推進事業費1億812万2,000円・児童健全育成事業498万4,000円等を含む令和6年度一般会計補正予算（第1号）1億2,418万2,000円（補正後総額92億1,740万9,000円）を4月臨時会で審議。",
+    a: "質疑・討論なく全員賛成で可決。デジタル田園都市国家構想タイプ3の交付金でICT教育を推進。",
+    e: "4月臨時議会で、ICT教育推進の費用1億円超を含む補正予算を全会一致で可決した。" },
+
+  // --- R6.6 (2024年6月) 追加 ---
+  { s: "r6-6", c: "child", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "保育園の主食持参を見直せない？",
+    q: "町外と比べ朝日町の保育所はご飯を家から持参。改善はできないか？",
+    a: "施設や調理員の確保等を考慮する必要があるが、保護者の要望も踏まえ研究する。",
+    e: "保育園の昼ごはんで、ご飯を家から持っていく現状。改善を検討中。" },
+  { s: "r6-6", c: "disaster", sp: "吉江昌宏 議員（グループ22）", an: "消防署長",
+    t: "防火水槽と消火栓の位置図は？",
+    q: "消火活動の効率化のため、防火水槽と消火栓の位置を一目で把握できる図を作成すべき。",
+    a: "現在は別管理だが、消防団員も活用できる統合位置図の作成を検討する。",
+    e: "火事の時にすぐ使える消火栓・水槽の位置をまとめた地図を作る方針。" },
+  { s: "r6-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "農林水産課長",
+    t: "土砂災害への対策は？",
+    q: "近年の豪雨災害が多発。土砂災害対策は？",
+    a: "県と連携し、土砂流出箇所や危険斜面の調査・整備を継続中。住民への避難情報提供も強化。",
+    e: "豪雨で山が崩れる危険。県と連携して土砂災害の予防を進めます。" },
+  { s: "r6-6", c: "child", sp: "善田奈緒 議員（未来）", an: "教育委員会事務局長",
+    t: "食育の推進は？",
+    q: "学校給食を通じた食育の取り組みは？",
+    a: "地元産食材の利用や栄養指導を実施。食を通じて健康と地域への愛着を育む。",
+    e: "学校の給食を使って、子どもに健康的な食事と地元食材の良さを教えています。" },
+
+  // ===== 令和6年8月臨時会 =====
+  { s: "r6-8ri", c: "budget", sp: "町長（提案）", an: "全員賛成で可決",
+    t: "企業立地奨励金1億9,449万円等を含む令和6年度補正予算（第5号）を可決",
+    q: "企業立地奨励事業1億9,449万1,000円、公共サービスパス事業500万円、棚山ファミリーランド・棚山荘管理費260万円等を計上した令和6年度一般会計補正予算（第5号）2億376万3,000円を8月臨時会で審議。",
+    a: "質疑・討論なく全員賛成で可決。財源は繰入金1億9,400万円、繰越金476万3,000円、諸収入500万円。町制施行70周年記念式典も無事終了との報告あり。",
+    e: "8月臨時議会で、新規企業への立地奨励金約2億円を含む補正予算を全会一致で可決した。" },
+
+  // --- R6.9 (2024年9月) 追加 ---
+  { s: "r6-9", c: "council", sp: "西岡良則 議員（未来）", an: "町長",
+    t: "町の財政状況は？",
+    q: "令和5年度決算からみた今後の財政運営は？",
+    a: "歳入101億2,886万円、歳出96億8,456万円。投資的経費（8.2%）と義務的経費（34.2%）のバランスを保つ必要がある。",
+    e: "町のお金は黒字だが、固定費の比率が高め。慎重な運営が必要。" },
+  { s: "r6-9", c: "infra", sp: "吉江昌宏 議員（グループ22）", an: "建設課長",
+    t: "町営住宅の現状と今後は？",
+    q: "町営住宅の利用状況と今後の整備計画は？",
+    a: "現在の入居率を確認しつつ、令和7年度に60歳未満の単身者入居も可能となるよう条例改正を予定。",
+    e: "町営住宅の使い道を見直し。一人暮らしの方も入りやすく改善予定。" },
+  { s: "r6-9", c: "medical", sp: "由井崇 議員（青雲）", an: "健康課長",
+    t: "身寄りのない方が亡くなったら？",
+    q: "高齢者で身寄りがない方の葬儀対応はどうしている？",
+    a: "民生委員等と連携して把握。家族や成年後見人の有無を確認し、必要に応じて町が手続きをサポート。",
+    e: "ひとり身のお年寄りが亡くなった時、町と地域で支援する仕組みがあります。" },
+
+  // ===== 令和6年10月臨時会 =====
+  { s: "r6-10ri", c: "budget", sp: "町長（提案）", an: "全員賛成で可決・承認",
+    t: "衆院選費用の専決処分・工場用地造成・体育館改修工事の3議案を可決",
+    q: "①衆議院議員総選挙（10月27日執行）に伴う給与費・事務費896万5,000円の専決処分承認、②浜草野地内工場用地造成工事の請負契約締結（4社入札、落札率91.76%）、③朝日町文化体育センター第1体育館改修工事の請負契約締結（2社入札、落札率99.36%）の3議案を10月臨時会で審議。",
+    a: "3議案とも全会一致で可決・承認。工場用地造成・文化体育センター改修の工事請負契約は小川建設工業株式会社等と計約4億1,668万円で締結。",
+    e: "10月臨時議会で、衆院選の選挙費用確保と工場用地・体育館の工事契約（計4億円超）を全会一致で可決した。" },
+
+  // --- R6.12 (2024年12月) 追加 ---
+  { s: "r6-12", c: "disaster", sp: "議会報告会（11月16日）", an: "町・住民",
+    t: "サル被害により家庭菜園ができなくなっている",
+    q: "電気柵設置などの支援を。生きがいや健康づくりにも繋がる支援が必要。",
+    a: "個人支援は公平性の課題あり。共同農園の設置支援の可能性や、関係課で協議を検討。",
+    e: "町民との対話会で「サル被害で畑ができない」声。共同農園など新しい支援を検討。" },
+  { s: "r6-12", c: "disaster", sp: "議会報告会（11月16日）", an: "町・住民",
+    t: "街中に出没するクマ、対策は？",
+    q: "正確な情報と動向把握、安全確保の取り組みを知りたい。",
+    a: "警察官常駐、ドローン監視、宅地跡の餌場（柿の木）対策。河川の雑木除去を県へ重要要望中。",
+    e: "クマが街中に来た時、警察やドローンで監視。川の草木整備で隠れ家を減らします。" },
+  { s: "r6-12", c: "council", sp: "議会報告会（11月16日）", an: "町・住民",
+    t: "特定空家、いつ撤去？",
+    q: "周辺住民が安心して暮らせるよう早急に撤去を。",
+    a: "現在8件の特定空家。老朽具合と緊急度を建築士が調査中。令和7年度から順次代執行を進める方針。",
+    e: "倒壊しそうな空き家が町に8軒。来年度から順番に強制撤去します。" },
+
+  // --- R7.3 (2025年3月) 追加 ---
+  { s: "r7-3", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "豪雪時の除雪対応は？",
+    q: "今冬の豪雪における除雪対応について。",
+    a: "建設業者・農業生産法人・シルバー人材センターと連携。消雪設備と流雪溝の蓋も改善検討中。",
+    e: "雪が多くて大変な冬。様々な業者や人材センターと連携して除雪を進めています。" },
+  { s: "r7-3", c: "tourism", sp: "加藤好進 議員（グループ22）", an: "商工観光課長",
+    t: "舟川桜並木の活性化事業は？",
+    q: "舟川桜並木周辺活性化事業の内容は？",
+    a: "シャトルバス、新たな滞在型観光の創出、来訪者と地域住民の交流促進を含む総合的事業を展開。",
+    e: "「春の四重奏」をきっかけに、桜並木のあるエリア全体を観光地化する取り組み。" },
+  { s: "r7-3", c: "medical", sp: "加藤好進 議員（グループ22）", an: "健康課長",
+    t: "ヒアリングフレイル聴こえの健康チェック事業？",
+    q: "難聴の早期発見につながる健康チェック事業の内容は？",
+    a: "難聴を早期発見し、認知症の発症リスク等を軽減することを目的とする。各地区で健康チェックを実施。",
+    e: "耳が遠くなることを早く発見すれば、認知症の予防にもなる。新しい健康チェック。" },
+  { s: "r7-3", c: "infra", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "町の地籍調査の状況は？",
+    q: "地籍調査の必要性と災害対策との関連は？",
+    a: "町内の地籍調査の実施状況を踏まえ、災害復旧の迅速化等のため計画的に進める。",
+    e: "土地の境界をはっきりさせる調査。災害復旧をスムーズにするため大事です。" },
+
+  // --- R7.6 (2025年6月) 追加 ---
+  { s: "r7-6", c: "council", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "町職員募集の工夫と働き方改革は？",
+    q: "令和6年度職員募集の状況、ジョブ型採用などの工夫は？",
+    a: "全国的に公務員志望者が減少傾向。採用時期の見直しや希望業務に就きやすい仕組み、働き方改革で職員充足に努める。",
+    e: "町職員に応募する人が減って大変。働き方を見直して魅力ある職場にする方針。" },
+  { s: "r7-6", c: "council", sp: "清水眞人 議員（一歩会）", an: "みんなで未来！課長",
+    t: "南保みず穂館グラウンドの利活用は？",
+    q: "町有財産における遊休地（南保みず穂館グラウンド）の活用案は？",
+    a: "他の遊休地と合わせて利活用検討中。住民意見を踏まえながら検討する。",
+    e: "使われていない町の土地を、町民の声を聞きながら活用する方向で検討。" },
+  { s: "r7-6", c: "child", sp: "善田奈緒 議員（未来）", an: "みんなで未来！課長",
+    t: "「まちづくり会社」、なぜ今？",
+    q: "対象とするDXサービスや、3年間の工程、自走体制の見通しは？",
+    a: "官民連携・地域共創を基本に、令和9年4月の創業を目指す。住民との「共創」を通じて持続可能な地域づくりを進める。",
+    e: "町と民間が一緒に作る「まちづくり会社」。2027年4月の本格スタートを目指します。" },
+  { s: "r7-6", c: "disaster", sp: "吉江昌宏 議員（グループ22）", an: "消防署長",
+    t: "消防団の準中型免許取得を補助できない？",
+    q: "消防団員のなり手不足解消のため、準中型免許取得補助を導入できないか？",
+    a: "他自治体の取り組みも参考に、町としても検討する。",
+    e: "消防団の運転免許を取るお金を町が援助できないか検討中。" },
+
+  // --- R7.9 (2025年9月) 追加 ---
+  { s: "r7-9", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "インバウンド推進、効果は？",
+    q: "海外向け観光推進の取り組みと成果は？",
+    a: "職員が海外で商談。台湾メディアで「春の四重奏」が紹介され、報道を見た観光客も来訪。",
+    e: "海外からのお客さんを呼ぶ取り組み。台湾のテレビで紹介され実際に来てくれた人も。" },
+  { s: "r7-9", c: "medical", sp: "石原孝之 議員（グループ22）", an: "あさひ総合病院事務部長",
+    t: "あさひ総合病院非常勤医師の情報漏洩、その後は？",
+    q: "紛失したSDカードの調査結果と再発防止策は？",
+    a: "SDカードは未発見だが、現時点でデータ流出や悪用は確認されていない。再発防止策を徹底中。",
+    e: "病院の患者情報紛失問題、流出は確認されていません。再発防止を徹底中。" },
+  { s: "r7-9", c: "disaster", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "防災資機材、何を追加？",
+    q: "備蓄資材の充実状況は？",
+    a: "食料品の品目拡充（レトルト食品、トロミ剤など）。蓄電池付ソーラーパネル、スタンド照明器具も追加。",
+    e: "災害時の備蓄を充実。お年寄りも食べやすい食品や、停電時の電源も用意。" },
+
+  // ===== 令和7年10月臨時会 =====
+  { s: "r7-10ri", c: "infra", sp: "町長（提案）", an: "全員賛成で可決",
+    t: "庁舎の受水槽・高架水槽更新工事（氷見工業所、5,742万円）を可決",
+    q: "老朽化した役場庁舎の受水槽及び高架水槽を更新するため、株式会社氷見工業所との工事請負契約（5,742万円、3社入札、落札率99.71%）の締結を10月臨時会で審議。",
+    a: "全員賛成で可決。工期は令和8年3月23日まで。工事は基本的に休日に実施し、平日にかかる場合も業務に支障のないよう進める方針。（西岡議員・加藤議員が詳細を質問）",
+    e: "役場の給水設備（受水槽・高架水槽）が老朽化のため更新。5,742万円の工事を全会一致で可決した。" },
+
+  // --- R8.3 (2026年3月) 委員会レポート（議会だよりNo.129より） ---
+  { s: "r8-3", c: "tourism", sp: "総務産業常任委員会（R8.3.18）", an: "商工観光課",
+    t: "飲食店プレミアム商品券、商工会と時期をずらしては？",
+    q: "町と商工会の両方でプレミアム券を出すなら時期をずらしては？",
+    a: "過去に時期をずらすなど試したが、商工会は小売、町は飲食店とターゲットが分かれるため同時開催がベスト。",
+    e: "町と商工会のお得な商品券は時期をずらした方がいいという提案。両方同時の方が効果的との回答。" },
+  { s: "r8-3", c: "infra", sp: "民生教育常任委員会（R8.3.17）", an: "教育委員会",
+    t: "朝日まちなか体育館の利用、どう変わる？",
+    q: "条例改正で利用方法の変更点は？（議案第13号 朝日まちなか体育館条例一部改正）",
+    a: "夜9時30分まで30分単位で延長利用可能に。回数券は1枚バラ売り（役場・まめなけ市場で販売）。",
+    e: "夜遅くまで使えるようになり、回数券もバラで買えるように改善。R8.3議会で条例改正され全員賛成で可決。" },
+  { s: "r8-3", c: "medical", sp: "民生教育常任委員会（R8.3.17）", an: "あさひ総合病院",
+    t: "あさひ総合病院でのレスパイト入院は？",
+    q: "ショートステイが足りない時のレスパイト入院（介護者の休息）の周知は？",
+    a: "ケアマネ、開業医にも周知中。短期間の入院で介護家族の負担軽減ができる側面もある。",
+    e: "介護で疲れた家族のために、病院で短期間預かるサービス。もっと知られるよう周知中。" },
+
+  // --- R8.3 (2026年3月) 追加 ---
+  { s: "r8-3", c: "tourism", sp: "総務産業常任委員会", an: "みんなで未来！課",
+    t: "まちづくり推進事業費1億円超、内訳は？",
+    q: "まちづくり推進事業費1億円の使い方は？",
+    a: "事業構想2,700万円、まちづくり会社設立計画600万円、人件費4,200万円、町民巻き込み諸施策3,200万円、事務所開設等1,000万円、DXサービスカスタマイズ等。",
+    e: "新しく作る「まちづくり会社」の準備に約1億円。事業計画と人件費が中心です。" },
+  { s: "r8-3", c: "child", sp: "民生教育常任委員会", an: "教育委員会",
+    t: "放課後等デイサービス、希望に沿った利用ができている？",
+    q: "障害がある子どもへのサービスは希望通り使えているか？",
+    a: "一人当たり利用状況は10〜23日／月。希望どおり利用できないとの声は届いていない。",
+    e: "障害がある子どもの預かりサービスは、ほぼ希望通り利用できているとのこと。" },
+  { s: "r8-3", c: "tourism", sp: "総務産業常任委員会", an: "農林水産課",
+    t: "食彩あさひ（農林産物加工施設）の活動は？",
+    q: "農林産物加工施設の現状は？",
+    a: "平均年齢70代後半となっているが、生きがいとして活動。加工品数は減少しているが、お弁当やランチに取り組んでいる。",
+    e: "町の特産品加工所は70代の方が中心。お弁当販売など新しい取り組みも。" },
+
+  // ========== さらに追加：各議員「その他の質問」より ==========
+  // --- R5.3 (2023年3月) ---
+  { s: "r5-3", c: "council", sp: "石原孝之 議員（グループ22）", an: "総務政策課長",
+    t: "町内会からの補助金申請をオンライン化できない？",
+    q: "町内会からの補助金などの申請をオンライン化できないか？",
+    a: "DX推進の一環として段階的に検討。公式LINE経由での申請も視野に。",
+    e: "町内会の手続きを役場に行かなくてもネットで済ませる仕組みを検討中。" },
+  { s: "r5-3", c: "child", sp: "石原孝之 議員（グループ22）", an: "住民・子ども課長",
+    t: "保育所ICTアプリの運用状況は？",
+    q: "保育所で導入されたICTアプリの効果は？",
+    a: "登降園管理、保護者連絡、欠席連絡が便利になった。緊急時の情報配信もスムーズ。",
+    e: "保育園とアプリでやり取りできるシステム導入で、保護者の負担が大幅に減りました。" },
+  { s: "r5-3", c: "infra", sp: "西岡良則 議員（未来）", an: "建設課長",
+    t: "消雪装置の更新計画は？",
+    q: "老朽化した消雪装置の更新と維持管理方針は？",
+    a: "順次更新を進め、安心して使える消雪設備の維持に努める。電気料補助も検討。",
+    e: "雪を融かす道路の設備、古くなって壊れる前に少しずつ更新する計画。" },
+  { s: "r5-3", c: "disaster", sp: "西岡良則 議員（未来）", an: "総務政策課長",
+    t: "民生委員児童委員の担い手不足は？",
+    q: "民生委員のなり手が見つからない現状への対策は？",
+    a: "活動内容のPR、報酬の見直しなど、担い手確保策を検討中。",
+    e: "地域の困りごと相談役「民生委員」のなり手不足。町も対策を検討中。" },
+  { s: "r5-3", c: "tourism", sp: "清水眞人 議員（一歩会）", an: "商工観光課長",
+    t: "婚活支援事業について",
+    q: "婚活支援の現状と効果は？",
+    a: "とやまマリッジサポートセンター登録料の補助、市町合同の出会いイベントを継続中。",
+    e: "結婚相手を探す活動を支援する仕組み。近隣市町と合同イベントもやっています。" },
+  { s: "r5-3", c: "infra", sp: "吉江昌宏 議員（グループ22）", an: "総務政策課長",
+    t: "防災ラジオのデジタル化は？",
+    q: "災害情報伝達のため防災ラジオをデジタル化できない？",
+    a: "デジタル化を含む情報伝達手段の高度化を検討中。スマホ連携も視野に。",
+    e: "災害情報を伝えるラジオを最新の仕組みに変える検討中。スマホとも連携。" },
+  { s: "r5-3", c: "infra", sp: "吉江昌宏 議員（グループ22）", an: "商工観光課長",
+    t: "富山湾岸サイクリングコースの設定は？",
+    q: "観光振興と健康増進のため、湾岸サイクリングコースを設定できないか？",
+    a: "県や周辺自治体と連携し、コース設定の可能性を研究。",
+    e: "海沿いを自転車で走れるコースを作る提案。観光と健康づくりに。" },
+  { s: "r5-3", c: "budget", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "住宅取得促進補助の若年層支援強化は？",
+    q: "若年層への住宅取得補助を強化すべきでは？",
+    a: "若年者加算・子育て加算・新婚加算の3つの加算措置を新設し、若い世代を支援。",
+    e: "若い人が朝日町で家を建てる時の補助金を増やしました。" },
+  { s: "r5-3", c: "child", sp: "由井崇 議員（青雲）", an: "教育委員会事務局長",
+    t: "スクールバスの乗降場所について",
+    q: "通学に使うスクールバスの乗降場所の安全性は？",
+    a: "学校・保護者・地元と連携し、安全な乗降場所の確保に努める。",
+    e: "スクールバスの停留所、子どもが安全に乗り降りできる場所を選んでいます。" },
+
+  // --- R5.6 (2023年6月) ---
+  { s: "r5-6", c: "council", sp: "吉江昌宏 議員（グループ22）", an: "商工観光課長",
+    t: "ノッカルあさひまちの利便性向上は？",
+    q: "前日予約だけでなく当日予約での利用はできない？",
+    a: "タクシー事業者との地域交通における役割を相互に補完。すみ分けを明確にして共存している。",
+    e: "「ノッカル」とタクシーで役割分担。当日急な移動はタクシー、計画的にはノッカルを。" },
+  { s: "r5-6", c: "council", sp: "善田奈緒 議員（未来）", an: "総務政策課長",
+    t: "DX推進、職員の負担は？",
+    q: "今一番の課題は？",
+    a: "役場内で開催されているDX会議を通じて意識統一を図っている。「住民の生活の質向上が目的」と職員に重ねて説明。",
+    e: "デジタル化は手段であって目的じゃない。住民の暮らしを良くするのが目的だと意識統一中。" },
+  { s: "r5-6", c: "council", sp: "大井光男 議員（一歩会）", an: "教育委員会事務局長",
+    t: "新美術館の周辺施設との連携は？",
+    q: "ふるさと美術館と周辺の不動堂遺跡、まいぶんKANとの連携は？",
+    a: "「歴史と文化の香り漂うふるさとゾーン」として周遊コース設定、共通利用券発行などで連携を強化。",
+    e: "新美術館を中心に、近くの遺跡や博物館も合わせて楽しめるエリアとして整備。" },
+
+  // --- R5.9 (2023年9月) ---
+  { s: "r5-9", c: "infra", sp: "西岡良則 議員（未来）", an: "消防署長",
+    t: "町の消防団員確保策は？",
+    q: "全国的に消防団員が減少。確保策は？",
+    a: "報酬改善、定年機能別団員制度を導入。広報やイベントで活動内容を周知している。",
+    e: "消防団員が減って困っている問題。報酬を上げたり活動をPRしたりして集めています。" },
+  { s: "r5-9", c: "tourism", sp: "清水眞人 議員（一歩会）", an: "教育委員会事務局長",
+    t: "ふるさと美術館の年間計画は？",
+    q: "切れ目のない美術鑑賞ができる年間計画を立てるべきでは？",
+    a: "保有する館蔵品の常設展示を企画。1年を通して常設展、企画展、特別展で美術鑑賞を提供。",
+    e: "「いつ行っても何かしらの展示が見られる」美術館に。1年中楽しめるよう計画。" },
+  { s: "r5-9", c: "infra", sp: "石原孝之 議員（グループ22）", an: "建設課長",
+    t: "県道の流雪溝の鉄製蓋の交換は？",
+    q: "重い鉄製蓋を高齢者にも開閉しやすいグレーチング蓋に交換できない？",
+    a: "県と協議し、高齢者世帯であることなどを条件として地元町内会との調整を行う。",
+    e: "雪の重い鉄製のフタを軽いものに替えてほしい要望。高齢の家庭から優先的に対応検討。" },
+  { s: "r5-9", c: "tourism", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "あさひ未来パークの建設スケジュールは？",
+    q: "全体事業費は？工事完成はいつ？",
+    a: "全体事業費約9.2億円。来年度から工事着手、令和7年度の完成を目指す。",
+    e: "新公園は約9.2億円かけて令和7年度完成予定の大事業。" },
+  { s: "r5-9", c: "council", sp: "善田奈緒 議員（未来）", an: "商工観光課長",
+    t: "教育機会の格差是正、移動を原因とした問題は？",
+    q: "公共交通サービスとしてのこどもノッカルの将来は？",
+    a: "持続可能なサービスとして評価・検証・協議を重ねていく。多様な居場所の創出も推進。",
+    e: "子どもが移動手段なくて学べないことがないよう、町でサポート。" },
+
+  // --- R5.12 (2023年12月) ---
+  { s: "r5-12", c: "infra", sp: "由井崇 議員（青雲）", an: "みんなで未来！課長",
+    t: "LoCoPiあさひまちの利便性向上は？",
+    q: "マイナンバーカードを使った具体的な利活用は？",
+    a: "国が示す運転免許証拡大、診察券、選挙時の入場受付や投票、避難所受付、公共交通利用などへの拡大を模索。",
+    e: "1枚のマイナンバーカードで、免許証や診察券、選挙の受付などもできる町を目指します。" },
+  { s: "r5-12", c: "tourism", sp: "吉江昌宏 議員（グループ22）", an: "総務政策課長",
+    t: "町職員募集にSNSを活用できないか？",
+    q: "業務量増加で職員確保が難しい中、SNSで業務内容を発信しては？",
+    a: "ユーチューブやインスタグラム活用などのSNS発信は大変有効。様々な角度から研究・検討していきたい。",
+    e: "町職員の仕事内容をSNSで動画発信して、応募者を増やす提案。" },
+
+  // --- R6.3 (2024年3月) ---
+  { s: "r6-3", c: "council", sp: "由井崇 議員（青雲）", an: "総務政策課長",
+    t: "町道と私有地の境界について",
+    q: "古い町道で個人所有の土地に道路がかかっている問題は？",
+    a: "個別案件ごとに内容を確認・判断する必要があり、相談に応じて対応する。",
+    e: "昔からある町道が、いつの間にか個人の土地にかかっていたら？相談ベースで対応します。" },
+  { s: "r6-3", c: "council", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "ペットの同行避難について",
+    q: "災害時のペット同行避難の対応は？",
+    a: "国のガイドラインを参考に、ペット同行避難について検討・周知を進める。",
+    e: "災害時にペットも一緒に避難できるよう、町の準備を進めています。" },
+  { s: "r6-3", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "春の四重奏の経済効果を伸ばす方策は？",
+    q: "舟川桜並木期間中の経済効果を更に伸ばすには？",
+    a: "シャトルバス利用者から協力金を募集し、桜並木保護活動と運営に充てる。新たな付加価値を創出。",
+    e: "桜の名所で集めた協力金で、桜並木をきれいに維持する取り組み。" },
+
+  // --- R6.6 (2024年6月) ---
+  { s: "r6-6", c: "tourism", sp: "西岡良則 議員（未来）", an: "商工観光課長",
+    t: "ビーチボール記念大会の計画は？",
+    q: "町制施行70周年のビーチボール記念大会は？",
+    a: "発祥地朝日町として、全国大会と連携した特別大会を計画。町をPRする機会とする。",
+    e: "町制70周年でビーチボール発祥地として全国大会を開催。" },
+  { s: "r6-6", c: "child", sp: "清水眞人 議員（一歩会）", an: "総務政策課長",
+    t: "未相続空き家家屋の実態は？",
+    q: "相続未登記の空き家の実態と対策は？",
+    a: "令和6年4月からの相続登記義務化を踏まえ、町としても所有者情報を把握し対応する。",
+    e: "持ち主がはっきりしない空き家問題。法律改正で対策が進みます。" },
+
+  // --- R6.9 (2024年9月) ---
+  { s: "r6-9", c: "child", sp: "善田奈緒 議員（未来）", an: "教育委員会事務局長",
+    t: "認定スクールトレーナー制度導入は？",
+    q: "予防医療普及啓発のため、認定スクールトレーナー制度を導入できないか？",
+    a: "現場のニーズを踏まえ、検討する。",
+    e: "学校に専門の運動指導員を入れて、子どもの健康を守る制度の導入を検討中。" },
+  { s: "r6-9", c: "council", sp: "善田奈緒 議員（未来）", an: "住民・子ども課長",
+    t: "町制施行70周年事業の評価は？",
+    q: "町主催事業の実施状況と評価、今後のまちづくりにつなげるための取り組みは？",
+    a: "70周年記念事業を町全体で展開。住民参加で町への愛着を醸成し、今後のまちづくりに繋げる。",
+    e: "町70歳のお祝いイベントを実施。みんなで町への愛着を深める機会に。" },
+  { s: "r6-9", c: "infra", sp: "由井崇 議員（青雲）", an: "住民・子ども課長",
+    t: "戸籍謄本等の郵送請求の支払い方法は？",
+    q: "戸籍・住民票の郵送請求時の支払い方法を簡素化できないか？",
+    a: "現在は定額小為替が一般的だが、キャッシュレス決済導入を含めた利便性向上を検討。",
+    e: "戸籍を郵便で取り寄せる時の支払いを、もっと簡単にできないか検討中。" },
+  { s: "r6-9", c: "council", sp: "吉江昌宏 議員（グループ22）", an: "住民・子ども課長",
+    t: "北又小屋周辺での通信環境の改善は？",
+    q: "北又小屋周辺の通信環境改善で安全確保を",
+    a: "登山者や利用者の安全のため、通信環境改善に向け関係機関と協議する。",
+    e: "山小屋周辺の電波が悪い問題。安全のために対策を進めます。" },
+
+  // --- R6.12 (2024年12月) ---
+  { s: "r6-12", c: "tourism", sp: "加藤好進 議員（グループ22）", an: "町長",
+    t: "「103万円の壁」と新年度予算への影響は？",
+    q: "国の「103万円の壁」見直しが町財政に与える影響は？",
+    a: "国の制度変更による町税収入への影響を試算し、予算編成に反映する。",
+    e: "国の税制改正（103万円の壁）が町の税収にも影響。対応を検討中。" },
+  { s: "r6-12", c: "council", sp: "西岡良則 議員（未来）", an: "あさひ総合病院事務部長",
+    t: "あさひ総合病院の電子カルテシステム障害対策は？",
+    q: "電子カルテシステムの障害対策は？",
+    a: "バックアップ体制を強化し、システム障害時にも診療継続できる仕組みを構築。",
+    e: "病院のシステムが止まっても診療を続けられるよう、バックアップを強化。" },
+  { s: "r6-12", c: "child", sp: "善田奈緒 議員（未来）", an: "教育委員会事務局長",
+    t: "校内スペシャルサポートルームとの連携は？",
+    q: "誰一人取り残されない学びの保障のため、校内スペシャルサポートルームとの連携は？",
+    a: "教育センター「あすなろ」と学校内のスペシャルサポートルームの連携を強化。",
+    e: "不登校気味の子も学校で安心して過ごせる教室と、町の支援センターの連携を強化。" },
+
+  // --- R7.3 (2025年3月) ---
+  { s: "r7-3", c: "disaster", sp: "寺西泉 議員（青雲）", an: "総務政策課長",
+    t: "スフィア基準を踏まえた避難所設営は？",
+    q: "国際基準（スフィア基準）に基づく避難所設営の検討は？",
+    a: "避難者一人当たり3.5m²の確保等、国際基準を踏まえた避難所運営を研究する。",
+    e: "災害時の避難所を国際基準（広さ・トイレ数など）に近づける検討。" },
+  { s: "r7-3", c: "infra", sp: "大井光男 議員（一歩会）", an: "建設課長",
+    t: "南保みず穂館グラウンドの利活用は？",
+    q: "閉鎖された南保みず穂館のグラウンドをどう活用？",
+    a: "町民への意見聴取を行いつつ、有効活用策を検討。説明会の開催も予定。",
+    e: "使われなくなった南保のグラウンドの活用法を、住民の意見を聞きながら検討中。" },
+
+  // --- R7.6 (2025年6月) ---
+  { s: "r7-6", c: "child", sp: "民生教育常任委員会", an: "教育委員会",
+    t: "小中学校体育館へのエアコン設置は？",
+    q: "猛暑対策として体育館にエアコンを設置できないか？",
+    a: "暑さ対策は必要だが既存施設活用のスタンス。中学校は体育・部活動でもエアコンのあるサンリーナ第1体育館を活用する方針。",
+    e: "体育館にエアコンを付ける代わりに、冷房のある体育センターを使う方針。" },
+  { s: "r7-6", c: "infra", sp: "総務産業常任委員会", an: "税務課",
+    t: "確定申告のe-Tax誘導は？",
+    q: "確定申告のe-Tax活用を促進できないか？",
+    a: "周知はしているが窓口対応まではしていない。税務署ではスマホで指導してもらえる。e-Taxにより業務は軽減する。",
+    e: "確定申告をネットで（e-Tax）やってもらえると、町も住民も楽になります。" },
+
+  // --- R7.9 (2025年9月) ---
+  { s: "r7-9", c: "infra", sp: "民生教育常任委員会", an: "教育委員会",
+    t: "ふるさと美術館・まいぶんKAN・百河豚美術館の連携は？",
+    q: "3つの美術館で共通券は？",
+    a: "ふるさと美術館とまいぶんKANは相互利用ができる100円チケットを配布。百河豚美術館は民間施設なので相互PRにとどまっている。",
+    e: "町の2つの美術館は100円で行き来できる券あり。百河豚美術館は民間なのでPRのみ。" },
+  { s: "r7-9", c: "medical", sp: "民生教育常任委員会", an: "健康課",
+    t: "子宮頸がんワクチン接種は進んでいる？",
+    q: "町の子宮頸がんワクチン接種状況は？",
+    a: "接種率は上昇しているが、年齢が若いほど低下傾向にある。10代への接種推奨が必要。",
+    e: "子宮頸がん予防のワクチン、特に10代への接種をもっと進める必要があります。" },
+
+  // --- R7.12 (2025年12月) ---
+  { s: "r7-12", c: "disaster", sp: "民生教育常任委員会", an: "総務政策課",
+    t: "町防災情報を受け取る手段、連動している？",
+    q: "防災無線・防災情報アプリ・HPは連動している？登録状況は？",
+    a: "防災無線・防災情報アプリ・HPは連動し、公式LINEとは連動しない。登録はLINE約4,700人、防災情報アプリ908人。",
+    e: "町の防災情報はアプリで受け取れます。クマや津波の緊急情報は防災アプリが確実。" },
+  { s: "r7-12", c: "infra", sp: "民生教育常任委員会", an: "建設課",
+    t: "泊高校跡地へのアクセス道路、建設スケジュールは？",
+    q: "泊高校跡地への道路はいつできる？",
+    a: "本年度は設計、来年度は用地測量。建設はその後となる。",
+    e: "泊高校の跡地へ行く道路、今年設計・来年測量・その後建設の流れ。" },
+  { s: "r7-12", c: "child", sp: "民生教育常任委員会", an: "住民・子ども課",
+    t: "こども誰でも通園制度、町はどう取り組む？",
+    q: "「こども誰でも通園制度」を町はどう実施する？",
+    a: "3保育園にて、定員空き枠で実施予定。子育て支援センターでの一時預かりとは別事業として扱う。",
+    e: "保育園に通っていない子も時々保育園を体験できる新制度。町内3園で実施。" },
+  { s: "r7-12", c: "infra", sp: "総務産業常任委員会", an: "住民・子ども課",
+    t: "空き家バンク、情報公開のセキュリティは？",
+    q: "空き家バンクの情報公開はどこまで？",
+    a: "町内名のみで番地・所有者は非公表。写真・見取り図は所有者希望で任意。防犯面を含め総合的に考えていく。",
+    e: "空き家情報の公開、防犯のため番地は出さず、町内名だけにしています。" },
+
+];
+
+// ===== 用語集 =====
+const glossary = [
+  { term: "議案", kana: "ぎあん", def: "町が「これから決めたいこと」を、議会に出して話し合ってもらう提案書。", example: "例：来年度の予算、新しい条例の制定、人事の同意など" },
+  { term: "条例", kana: "じょうれい", def: "町独自のルール。法律と違って、その町だけで適用される。", example: "例：朝日町海浜公園条例、朝日町まちなか体育館条例" },
+  { term: "議決", kana: "ぎけつ", def: "議員が話し合って、賛成・反対の意思を決めること。「全員賛成」のことを「全賛」と書く。", example: "例：議案第1号は全員賛成で原案可決" },
+  { term: "可決", kana: "かけつ", def: "議案が議会で「OK」と認められること。逆は「否決」。", example: "" },
+  { term: "原案可決", kana: "げんあんかけつ", def: "町が出した案を、修正なしでそのまま認めること。", example: "" },
+  { term: "認定", kana: "にんてい", def: "「すでに行ったこと」（決算など）が正しかったと議会が認めること。議案が未来のこと、認定は過去のこと。", example: "例：令和6年度決算の認定" },
+  { term: "陳情", kana: "ちんじょう", def: "町民から議会に「こうしてほしい」と意見・要望を出すこと。", example: "" },
+  { term: "定例会", kana: "ていれいかい", def: "年に決まった時期（3月・6月・9月・12月）に開かれる定期的な議会。", example: "" },
+  { term: "臨時会", kana: "りんじかい", def: "緊急で何かを決める必要があるときに、定例会とは別に開かれる議会。", example: "" },
+  { term: "本会議", kana: "ほんかいぎ", def: "議員全員が集まって最終決定をする会議。YouTube Liveで中継されるのはこの会議。", example: "" },
+  { term: "常任委員会", kana: "じょうにんいいんかい", def: "テーマごとに少人数で詳しく審査する会議。朝日町には「総務産業」と「民生教育」の2つがある。", example: "" },
+  { term: "代表質問", kana: "だいひょうしつもん", def: "会派（議員のグループ）を代表して、町長などに政策の方針を聞く質問。", example: "" },
+  { term: "一般質問", kana: "いっぱんしつもん", def: "議員一人ひとりが、町の課題について自由に質問すること。", example: "" },
+  { term: "会派", kana: "かいは", def: "考えや方向性が近い議員が集まったグループ。朝日町には「青雲」「未来」「グループ22」「一歩会」の4会派。", example: "" },
+  { term: "補正予算", kana: "ほせいよさん", def: "年度の途中で「予算を追加・変更したい」ときに作る予算。", example: "例：物価高対策のために追加で予算を組む" },
+  { term: "専決処分", kana: "せんけつしょぶん", def: "本来は議会の議決が必要なことを、緊急時など特別な事情で町長が先に決めて、あとで議会に報告すること。", example: "" },
+  { term: "一般会計", kana: "いっぱんかいけい", def: "町のお金の出入りをまとめた「メインの財布」。", example: "朝日町の令和8年度一般会計予算：89億4,568万円" },
+  { term: "特別会計", kana: "とくべつかいけい", def: "目的が決まっているお金（国民健康保険、水道、奨学金など）の出入りを別管理するもの。", example: "" },
+  { term: "経常収支比率", kana: "けいじょうしゅうしひりつ", def: "毎年入ってくる収入のうち、必ず出ていくお金の割合。低いほど自由に使えるお金が多い。", example: "朝日町の令和6年度：93.8%" },
+  { term: "実質公債費比率", kana: "じっしつこうさいひひりつ", def: "町の収入に対して、借金の返済が占める割合。15〜20%が警戒ライン。", example: "朝日町：13.3%（適正な範囲内）" },
+  { term: "扶助費", kana: "ふじょひ", def: "生活保護・児童手当・障害者支援など、生活に困っている人を助けるためのお金。", example: "" },
+  { term: "公債費", kana: "こうさいひ", def: "町の借金（地方債）の返済に使うお金。", example: "" },
+  { term: "民生費", kana: "みんせいひ", def: "介護・子育て・高齢者・障がい者など、福祉に使われるお金。", example: "朝日町の令和8年度民生費：18億8,400万円" },
+  { term: "総務費", kana: "そうむひ", def: "人事・財政・企画・戸籍・選挙・防災など、町役場の事務に使われるお金。", example: "" },
+  { term: "土木費", kana: "どぼくひ", def: "道路・橋・公園などの整備に使われるお金。", example: "" },
+  { term: "衛生費", kana: "えいせいひ", def: "健康増進・ゴミ処理・病院経営支援などに使われるお金。", example: "" },
+  { term: "ふるさと納税", kana: "ふるさとのうぜい", def: "好きな自治体に寄付すると、お礼の品（返礼品）がもらえ、税金も軽減される制度。", example: "" },
+  { term: "プロポーザル方式", kana: "ぷろぽーざるほうしき", def: "業者を選ぶときに、価格だけでなく「提案内容」で選ぶ方法。", example: "" },
+  { term: "BCP（業務継続計画）", kana: "びーしーぴー", def: "災害などの非常時でも、議会や行政が止まらず機能を保つための計画。", example: "" },
+  { term: "あいの風とやま鉄道", kana: "あいのかぜとやまてつどう", def: "富山県内を走る第三セクター（県と市町村が出資する会社）の鉄道。泊駅もこの会社の駅。", example: "" },
+  { term: "新川医療圏", kana: "にいかわいりょうけん", def: "朝日町・入善町・黒部市・魚津市を含む地域の医療連携範囲。", example: "" },
+  { term: "LoCoPiあさひまち", kana: "ろこぴあさひまち", def: "朝日町の地域通貨・ポイントサービス。マイナンバーカードを使ってお店で使える。", example: "" },
+  { term: "ノッカル", kana: "のっかる", def: "朝日町のマイカーを使った共助型公共交通。住民同士の助け合いで移動を支える。", example: "" },
+  { term: "関係人口", kana: "かんけいじんこう", def: "そこに住んでいないけど、何らかの形で町に関わっている人（出身者、ファン、ボランティアなど）。", example: "" },
+  { term: "スクラップ&ビルド", kana: "すくらっぷあんどびるど", def: "古いもの・必要性が薄いものをやめて（スクラップ）、新しい必要なことを始める（ビルド）こと。", example: "" },
+  { term: "DX", kana: "でぃーえっくす", def: "デジタル・トランスフォーメーション。デジタル技術で社会や行政の仕組みを変えること。", example: "" },
+  { term: "代執行", kana: "だいしっこう", def: "本人がやるべきこと（空き家の取壊しなど）をやらない場合、行政が代わりにやって費用を請求する仕組み。", example: "" },
+  { term: "消滅可能性自治体", kana: "しょうめつかのうせいじちたい", def: "若年女性人口が今後30年で50%以上減少すると予想される自治体。朝日町も2024年4月に分類された。", example: "" }
+];
+
+// ===== 関数 =====
+function normalizeName(str) {
+  return String(str || '').replace(/[\s　]/g, '');
+}
+
+function showMemberDetail(seatNum) {
+  const m = members.find(x => x.seat === seatNum);
+  if (!m) return;
+  const cleanName = normalizeName(m.name);
+  const memberTopics = topics.filter(t => normalizeName(t.sp).includes(cleanName));
+  const c = kaihaColors[m.kaiha];
+
+  // 議会ごとにグループ化
+  const bySession = {};
+  memberTopics.forEach(t => {
+    if (!bySession[t.s]) bySession[t.s] = [];
+    bySession[t.s].push(t);
+  });
+  const sessionOrder = sessions.map(s => s.id).reverse();
+  const sortedSessions = sessionOrder.filter(id => bySession[id]);
+
+  // 分野別集計
+  const catCounts = {};
+  memberTopics.forEach(t => { const cats = Array.isArray(t.c) ? t.c : [t.c]; cats.forEach(c => { catCounts[c] = (catCounts[c] || 0) + 1; }); });
+  const topCats = Object.entries(catCounts).sort((a,b) => b[1]-a[1]).slice(0,4);
+
+  const roleBadge = m.role === '議長' ? `<span style="background:#dc2626;color:white;padding:3px 10px;border-radius:8px;font-size:0.78rem;font-weight:700;margin-right:8px;">議長</span>` :
+                    m.role === '副議長' ? `<span style="background:#f59e0b;color:white;padding:3px 10px;border-radius:8px;font-size:0.78rem;font-weight:700;margin-right:8px;">副議長</span>` : '';
+
+  const html = `
+    <div class="modal-header" style="--c:${c}; background: linear-gradient(135deg, ${c}, ${c}dd);">
+      <div>
+        <h2>${roleBadge}${m.name} 議員</h2>
+        <div class="modal-subinfo">${m.furigana}　｜　議席${m.seat}番　｜　当選${m.terms}回</div>
+      </div>
+      <button class="modal-close" onclick="closeMemberModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stats" style="--c:${c};">
+        <div>
+          <div class="stat-label">会派</div>
+          <div class="stat-value">${m.kaiha}</div>
+        </div>
+        <div>
+          <div class="stat-label">党派</div>
+          <div class="stat-value" style="color:${m.party==='自由民主党'?'#b91c1c':'#6b7280'};">${m.party}</div>
+        </div>
+        <div>
+          <div class="stat-label">これまでの収録質問</div>
+          <div class="stat-value">${memberTopics.length}件</div>
+        </div>
+        <div>
+          <div class="stat-label">登壇した議会</div>
+          <div class="stat-value">${sortedSessions.length}回</div>
+        </div>
+      </div>
+
+      ${topCats.length > 0 ? `
+        <div class="modal-section-title">📂 よく取り上げる分野</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          ${topCats.map(([cid, cnt]) => {
+            const cat = categories.find(x => x.id === cid);
+            return `<div style="background:${cat.color}22; color:${cat.color}; padding:6px 12px; border-radius:14px; font-size:0.83rem; font-weight:600;">${cat.icon} ${cat.name} ${cnt}件</div>`;
+          }).join('')}
+        </div>
+      ` : ''}
+
+      <div class="modal-section-title">💬 過去の発言・質問（議会別・新しい順）</div>
+      ${memberTopics.length === 0 ? `
+        <div class="empty-state"><div class="icon">📭</div><p>この議員の収録された質問はまだありません。</p></div>
+      ` : sortedSessions.map(sid => {
+        const session = sessions.find(s => s.id === sid);
+        const topicsInSession = bySession[sid];
+        return `
+          <div style="margin-bottom: 18px;">
+            <div style="background:#eff6ff; padding:8px 12px; border-radius:8px; font-weight:700; color:#1e40af; margin-bottom:8px; font-size:0.92rem;">
+              📅 ${session.name}
+            </div>
+            <div class="modal-question-list">
+              ${topicsInSession.map(t => {
+                const cat = categories.find(x => x.id === t.c);
+                return `
+                  <div class="modal-question-item" style="--c:${cat.color};">
+                    <div class="mq-header">
+                      <div class="mq-title">${t.t}</div>
+                      <span style="background:${cat.color}22; color:${cat.color}; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600;">${cat.icon} ${cat.name}</span>
+                    </div>
+                    <div style="font-size:0.78rem; color:#6b7280; margin-bottom:4px;">→ 答弁：${t.an}</div>
+                    <div class="mq-q"><span class="mq-label" style="color:#92400e;">質問</span>${t.q}</div>
+                    <div class="mq-a"><span class="mq-label" style="color:#166534;">答弁</span>${t.a}</div>
+                    <div class="mq-easy">💡 ${t.e}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('member-modal-box').innerHTML = html;
+  document.getElementById('member-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMemberModal() {
+  document.getElementById('member-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ESCで閉じる
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeMemberModal();
+});
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+// 議員一覧
+function renderMembers() {
+  document.getElementById('members-grid').innerHTML = members.map(m => {
+    const partyClass = m.party === '自由民主党' ? 'party-dem' : 'party-ind';
+    const roleBadge = m.role === '議長' ? '<span class="role-badge">議長</span><br>' :
+                      m.role === '副議長' ? '<span class="role-badge sub">副議長</span><br>' : '';
+    const memberCount = topics.filter(t => normalizeName(t.sp).includes(normalizeName(m.name))).length;
+    return `
+      <div class="member-card" style="--c:${kaihaColors[m.kaiha]}" onclick="showMemberDetail(${m.seat})">
+        <span class="seat">議席${m.seat}</span>
+        ${roleBadge}
+        <div class="member-name">${m.name}</div>
+        <div class="member-furigana">${m.furigana}</div>
+        <div class="member-info">
+          <span class="label">会派</span> <span class="kaiha-name">${m.kaiha}</span><br>
+          <span class="label">党派</span> <span class="${partyClass}">${m.party}</span>
+        </div>
+        <div class="terms">当選${m.terms}回 ｜ 収録質問 ${memberCount}件</div>
+      </div>
+    `;
+  }).join('');
+
+  // 会派集計
+  const kaihaCounts = {};
+  members.forEach(m => { kaihaCounts[m.kaiha] = (kaihaCounts[m.kaiha] || 0) + 1; });
+  document.getElementById('kaiha-bar').innerHTML = Object.entries(kaihaCounts).map(([k, c]) =>
+    `<div class="breakdown-chip" style="--c:${kaihaColors[k]}"><strong>${k}</strong>${c}名</div>`
+  ).join('');
+
+  // 党派集計
+  const partyCounts = {};
+  members.forEach(m => { partyCounts[m.party] = (partyCounts[m.party] || 0) + 1; });
+  document.getElementById('party-bar').innerHTML = Object.entries(partyCounts).map(([p, c]) => {
+    const color = p === '自由民主党' ? '#b91c1c' : '#6b7280';
+    return `<div class="breakdown-chip" style="--c:${color}"><strong>${p}</strong>${c}名</div>`;
+  }).join('');
+}
+
+// 定例会一覧（新しい順）
+function renderSessions() {
+  const sortedSessions = [...sessions].reverse();
+  document.getElementById('session-list').innerHTML = sortedSessions.map(s => {
+    const topicCount = topics.filter(t => t.s === s.id).length;
+    const status = broadcastStatus(s.endDate);
+    const statusBadge = `<span style="background:${status.color}; color:white; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; margin-left:8px; vertical-align:middle;">${status.label}</span>`;
+    const statsHtml = s.upcoming ? `
+      <div class="session-stats">
+        <span class="stat" style="background:#dcfce7;color:#166534;">📺 YouTube生中継予定</span>
+      </div>
+    ` : `
+      <div class="session-stats">
+        <span class="stat">📋 議案 ${s.bills}件</span>
+        <span class="stat">💬 質問 ${s.questions}件</span>
+        <span class="stat">📝 アプリ収録 ${topicCount}件</span>
+      </div>
+    `;
+    // ★ 質問と答えボタンを目立たせる
+    const qaBtn = topicCount > 0 ?
+      `<button class="btn btn-primary-large" onclick="openSessionQA('${s.id}')">💬 質問と答えを見る（${topicCount}件）</button>` : '';
+    const youtubeBtn = status.type === 'expired' ?
+      `<span class="btn-mini disabled">📺 視聴期間終了</span>` :
+      `<a class="btn-mini" href="${broadcastBase}" target="_blank" rel="noopener">▶ YouTube中継ページ</a>`;
+    const minutesBtn = `<a class="btn-mini" href="${s.minutes}" target="_blank" rel="noopener">📑 会議録検索</a>`;
+    return `
+      <div class="session-card" style="border-left-color:${status.color};">
+        <h3>${s.name}${statusBadge}</h3>
+        <div class="meta">📅 ${s.date}</div>
+        <div class="summary">${s.summary}</div>
+        ${statsHtml}
+        ${qaBtn ? `<div class="primary-action">${qaBtn}</div>` : ''}
+        <div class="sub-links">
+          ${minutesBtn}
+          ${youtubeBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 議会別Q&A
+function renderQA() {
+  const sortedSessions = [...sessions].reverse();
+  document.getElementById('qa-container').innerHTML = sortedSessions.map(s => {
+    const sessionTopics = topics.filter(t => t.s === s.id);
+    if (sessionTopics.length === 0) return '';
+    return `
+      <div class="session-qa-block" data-session="${s.id}">
+        <div class="session-qa-header" onclick="toggleQA('${s.id}')">
+          <h3>${s.name}（${sessionTopics.length}件）</h3>
+          <span class="toggle" id="toggle-${s.id}">▼</span>
+        </div>
+        <div class="session-qa-body" id="qa-body-${s.id}">
+          <div class="session-meta">
+            📅 ${s.date}　｜
+            <a href="${s.minutes}" target="_blank">📑 公式会議録を見る</a>
+          </div>
+          <div class="topic-list">
+            ${sessionTopics.map(renderTopicCard).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleQA(sessionId) {
+  const body = document.getElementById('qa-body-' + sessionId);
+  const toggle = document.getElementById('toggle-' + sessionId);
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function openSessionQA(sessionId) {
+  switchTab('qa');
+  setTimeout(() => {
+    const body = document.getElementById('qa-body-' + sessionId);
+    const toggle = document.getElementById('toggle-' + sessionId);
+    if (body && !body.classList.contains('open')) {
+      body.classList.add('open');
+      toggle.textContent = '▲';
+    }
+    document.querySelector(`[data-session="${sessionId}"]`).scrollIntoView({behavior: 'smooth', block: 'start'});
+  }, 100);
+}
+
+function renderTopicCard(t) {
+  const catIds = Array.isArray(t.c) ? t.c : [t.c];
+  const cats = catIds.map(id => categories.find(c => c.id === id)).filter(Boolean);
+  const primaryCat = cats[0];
+  const session = sessions.find(s => s.id === t.s);
+  return `
+    <div class="topic-card" style="border-left-color:${primaryCat?.color || '#6366f1'}">
+      <div class="topic-header">
+        <h4>${t.t}</h4>
+        <div class="topic-tags-row">
+          <span class="tag tag-session">📅 ${session?.name || ''}</span>
+        </div>
+        <div class="topic-tags-row">
+          ${cats.map(cat => `<span class="tag tag-category">${cat.icon} ${cat.name}</span>`).join('')}
+        </div>
+      </div>
+      <div class="speaker-info">👤 ${t.sp} → 答弁：${t.an}</div>
+      <div class="question"><span class="label">質問：</span>${t.q}</div>
+      <div class="answer"><span class="label">答弁：</span>${t.a}</div>
+      <div class="easy-summary">${t.e}</div>
+    </div>
+  `;
+}
+
+// QA検索
+document.getElementById('qa-search').addEventListener('input', e => {
+  const kw = e.target.value.toLowerCase();
+  if (!kw) {
+    renderQA();
+    return;
+  }
+  const sortedSessions = [...sessions].reverse();
+  document.getElementById('qa-container').innerHTML = sortedSessions.map(s => {
+    const sessionTopics = topics.filter(t => {
+      if (t.s !== s.id) return false;
+      const blob = (t.t + t.q + t.a + t.e + t.sp).toLowerCase();
+      return blob.includes(kw);
+    });
+    if (sessionTopics.length === 0) return '';
+    return `
+      <div class="session-qa-block" data-session="${s.id}">
+        <div class="session-qa-header" onclick="toggleQA('${s.id}')">
+          <h3>${s.name}（${sessionTopics.length}件マッチ）</h3>
+          <span class="toggle" id="toggle-${s.id}">▲</span>
+        </div>
+        <div class="session-qa-body open" id="qa-body-${s.id}">
+          <div class="session-meta">
+            📅 ${s.date}　｜
+            <a href="${s.minutes}" target="_blank">📑 公式会議録を見る</a>
+          </div>
+          <div class="topic-list">
+            ${sessionTopics.map(renderTopicCard).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="empty-state"><div class="icon">🔍</div><p>該当する議題が見つかりませんでした。</p></div>';
+});
+
+// カテゴリー
+let currentCategoryFilter = 'all';
+function renderCategories() {
+  document.getElementById('category-grid').innerHTML = categories.map(c => {
+    const count = topics.filter(t => Array.isArray(t.c) ? t.c.includes(c.id) : t.c === c.id).length;
+    return `
+      <div class="category-card" style="--cat-color:${c.color}" onclick="setCategoryFilter('${c.id}')">
+        <div class="cat-icon">${c.icon}</div>
+        <h3>${c.name}</h3>
+        <div class="count">${count}件の議題</div>
+        <div class="desc">${c.desc}</div>
+      </div>
+    `;
+  }).join('');
+  renderCategoryFilter();
+  renderCategoryTopics();
+}
+function setCategoryFilter(catId) {
+  currentCategoryFilter = catId;
+  renderCategoryFilter();
+  renderCategoryTopics();
+  document.getElementById('topic-list').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+function renderCategoryFilter() {
+  document.getElementById('topic-filter').innerHTML = `
+    <button class="filter-btn ${currentCategoryFilter==='all'?'active':''}" onclick="setCategoryFilter('all')">すべて</button>
+    ${categories.map(c => `<button class="filter-btn ${currentCategoryFilter===c.id?'active':''}" onclick="setCategoryFilter('${c.id}')" style="${currentCategoryFilter===c.id?'background:'+c.color+';border-color:'+c.color:''}">${c.icon} ${c.name}</button>`).join('')}
+  `;
+}
+function renderCategoryTopics() {
+  const filtered = currentCategoryFilter === 'all' ? topics : topics.filter(t => Array.isArray(t.c) ? t.c.includes(currentCategoryFilter) : t.c === currentCategoryFilter);
+  const list = document.getElementById('topic-list');
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>該当する議題が見つかりませんでした。</p></div>`;
+  } else {
+    // 新しい順
+    const sortedFiltered = [...filtered].sort((a, b) => {
+      const sa = sessions.findIndex(s => s.id === a.s);
+      const sb = sessions.findIndex(s => s.id === b.s);
+      return sb - sa;
+    });
+    list.innerHTML = sortedFiltered.map(renderTopicCard).join('');
+  }
+}
+
+// 用語集
+function renderGlossary(filter = '') {
+  let filtered = glossary;
+  if (filter) {
+    const kw = filter.toLowerCase();
+    filtered = glossary.filter(g => (g.term + g.kana + g.def + g.example).toLowerCase().includes(kw));
+  }
+  const grid = document.getElementById('glossary-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📖</div><p>該当する用語が見つかりませんでした。</p></div>`;
+  } else {
+    grid.innerHTML = filtered.map(g => `
+      <div class="term-card">
+        <h4>${g.term} <span class="kana">（${g.kana}）</span></h4>
+        <p>${g.def}</p>
+        ${g.example ? `<div class="example">${g.example}</div>` : ''}
+      </div>
+    `).join('');
+  }
+}
+document.getElementById('glossary-search').addEventListener('input', e => renderGlossary(e.target.value));
+
+// 初期化
+renderMembers();
+renderSessions();
+renderQA();
+renderCategories();
+renderGlossary();
+</script>
+</body>
+</html>
