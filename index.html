@@ -382,69 +382,8 @@
   }
 </style>
 
-<style>
-#lock-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
-  z-index: 9999; display: flex; align-items: center; justify-content: center;
-}
-#lock-box {
-  background: white; border-radius: 20px; padding: 40px 36px;
-  width: 90%; max-width: 380px; text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-#lock-box h2 { font-size: 1.4rem; color: #1e40af; margin-bottom: 6px; }
-#lock-box p { color: #6b7280; font-size: 0.9rem; margin-bottom: 24px; }
-#lock-input {
-  width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb;
-  border-radius: 10px; font-size: 1rem; text-align: center;
-  letter-spacing: 2px; outline: none; margin-bottom: 16px;
-  transition: border-color 0.2s;
-}
-#lock-input:focus { border-color: #3b82f6; }
-#lock-btn {
-  width: 100%; padding: 12px; background: #2563eb; color: white;
-  border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
-  cursor: pointer; transition: background 0.2s;
-}
-#lock-btn:hover { background: #1d4ed8; }
-#lock-error {
-  color: #ef4444; font-size: 0.85rem; margin-top: 10px;
-  display: none;
-}
-</style>
 </head>
 <body>
-
-<div id="lock-overlay">
-  <div id="lock-box">
-    <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
-    <h2>朝日町議会わかるアプリ</h2>
-    <p>パスワードを入力してください</p>
-    <input type="password" id="lock-input" placeholder="パスワード"
-           onkeydown="if(event.key==='Enter')checkPw()">
-    <button id="lock-btn" onclick="checkPw()">ログイン</button>
-    <div id="lock-error">パスワードが違います</div>
-  </div>
-</div>
-<script>
-(function(){
-  if(sessionStorage.getItem('gikai_unlocked')==='1'){
-    document.getElementById('lock-overlay').style.display='none';
-  }
-})();
-function checkPw(){
-  var v=document.getElementById('lock-input').value;
-  if(v==='shiorijane'){
-    sessionStorage.setItem('gikai_unlocked','1');
-    document.getElementById('lock-overlay').style.display='none';
-  } else {
-    document.getElementById('lock-error').style.display='block';
-    document.getElementById('lock-input').value='';
-    document.getElementById('lock-input').focus();
-  }
-}
-</script>
 
 
 <header>
