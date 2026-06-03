@@ -13,6 +13,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; form-action 'none'; base-uri 'self';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
 <title>朝日町議会わかるアプリ｜富山県朝日町</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -330,6 +334,8 @@
     margin-top: 8px; border-left: 3px solid #3b82f6; font-size: 0.88rem; color: #1e3a8a;
   }
   .topic-card .easy-summary::before { content: "💡 やさしく言うと："; font-weight: 700; }
+  .src-link { display: inline-block; margin-top: 10px; font-size: 0.78rem; color: #6b7280; text-decoration: none; border-bottom: 1px solid #d1d5db; padding-bottom: 1px; transition: color 0.2s, border-color 0.2s; }
+  .src-link:hover { color: #2563eb; border-bottom-color: #2563eb; }
 
   .glossary-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -591,6 +597,58 @@ const kaihaColors = { "青雲": "#2563eb", "未来": "#7c3aed", "グループ22"
 // ===== 定例会データ（2023年〜2026年・YouTube中継ベース） =====
 const broadcastBase = "https://www.town.asahi.toyama.jp/soshiki/gikai/1504614240913.html";
 const minutesBase = "https://www.town.asahi.toyama.dbsr.jp/";
+
+// 各定例会の会議録ドキュメントURL（代表質問日・一般質問日）
+const sessionDocs = {
+  "r5-3":  { d: "https://www.town.asahi.toyama.dbsr.jp/939575?Template=document&Id=345#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/939575?Template=document&Id=347#one" },
+  "r5-6":  { d: "https://www.town.asahi.toyama.dbsr.jp/888793?Template=document&Id=355#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/888793?Template=document&Id=357#one" },
+  "r5-9":  { d: "https://www.town.asahi.toyama.dbsr.jp/583157?Template=document&Id=365#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/583157?Template=document&Id=367#one" },
+  "r5-12": { d: "https://www.town.asahi.toyama.dbsr.jp/745141?Template=document&Id=375#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/745141?Template=document&Id=377#one" },
+  "r6-3":  { d: "https://www.town.asahi.toyama.dbsr.jp/242698?Template=document&Id=387#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/242698?Template=document&Id=389#one" },
+  "r6-6":  { d: "https://www.town.asahi.toyama.dbsr.jp/875007?Template=document&Id=397#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/875007?Template=document&Id=399#one" },
+  "r6-9":  { d: "https://www.town.asahi.toyama.dbsr.jp/346581?Template=document&Id=407#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/346581?Template=document&Id=409#one" },
+  "r6-12": { d: "https://www.town.asahi.toyama.dbsr.jp/261312?Template=document&Id=417#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/261312?Template=document&Id=419#one" },
+  "r7-3":  { d: "https://www.town.asahi.toyama.dbsr.jp/278805?Template=document&Id=429#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/278805?Template=document&Id=431#one" },
+  "r7-6":  { d: "https://www.town.asahi.toyama.dbsr.jp/641006?Template=document&Id=439#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/641006?Template=document&Id=441#one" },
+  "r7-9":  { d: "https://www.town.asahi.toyama.dbsr.jp/718249?Template=document&Id=449#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/718249?Template=document&Id=451#one" },
+  "r7-12": { d: "https://www.town.asahi.toyama.dbsr.jp/156159?Template=document&Id=459#one",
+             i: "https://www.town.asahi.toyama.dbsr.jp/156159?Template=document&Id=461#one" },
+};
+
+// 代表質問を行った議員の名前キーワード（セッションごと）
+// r7-x以降はspフィールドに「代表質問」と明示されているため不要
+const sessionDaihyo = {
+  "r5-3":  ["寺西泉", "石原孝之", "西岡良則", "大井光男"],
+  "r5-6":  ["吉江昌宏", "善田奈緒", "大井光男", "西岡良則"],
+  "r5-9":  ["西岡良則", "清水眞人", "石原孝之", "大井光男"],
+  "r5-12": ["大井光男", "由井崇", "寺西泉", "吉江昌宏"],
+  "r6-3":  ["寺西泉", "石原孝之", "善田奈緒", "清水眞人"],
+  "r6-6":  ["吉江昌宏", "西岡良則", "大井光男", "寺西泉"],
+  "r6-9":  ["善田奈緒", "清水眞人", "寺西泉", "石原孝之"],
+  "r6-12": ["大井光男", "由井崇", "加藤好進", "西岡良則"],
+  "r8-3":  ["寺西泉", "石原孝之", "善田奈緒", "清水眞人"],
+};
+
+function getTopicDocUrl(t) {
+  const docs = sessionDocs[t.s];
+  if (!docs) return null;
+  if (t.sp.includes('代表質問')) return docs.d;
+  if (t.sp.includes('一般質問')) return docs.i;
+  const daihyo = sessionDaihyo[t.s] || [];
+  return daihyo.some(name => t.sp.includes(name)) ? docs.d : docs.i;
+}
+
 const TODAY = new Date("2026-05-30");
 function minutesUrl(start, end) {
   // 朝日町議会会議録検索データベース（トップページ：直近の議会一覧から各議会の会議録にアクセス可）
@@ -3096,6 +3154,10 @@ function renderTopicCard(t) {
   const cats = catIds.map(id => categories.find(c => c.id === id)).filter(Boolean);
   const primaryCat = cats[0];
   const session = sessions.find(s => s.id === t.s);
+  const docUrl = getTopicDocUrl(t);
+  const srcLink = docUrl
+    ? `<a class="src-link" href="${docUrl}" target="_blank" rel="noopener noreferrer">📑 会議録で確認する</a>`
+    : '';
   return `
     <div class="topic-card" style="border-left-color:${primaryCat?.color || '#6366f1'}">
       <div class="topic-header">
@@ -3111,6 +3173,7 @@ function renderTopicCard(t) {
       <div class="question"><span class="label">質問：</span>${t.q}</div>
       <div class="answer"><span class="label">答弁：</span>${t.a}</div>
       <div class="easy-summary">${t.e}</div>
+      ${srcLink}
     </div>
   `;
 }
